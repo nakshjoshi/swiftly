@@ -1,0 +1,177 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Users {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  avatarUrl String?
+
+  authAccount AuthAccount[]
+  resume      Resume[]
+}
+
+model AuthAccount {
+  id     String @id @default(uuid())
+  userId String
+
+  user Users @relation(fields: [userId], references: [id])
+
+  provider     String
+  providerId   String?
+  passwordHash String?
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@unique([provider, providerId])
+}
+
+model Resume {
+  id                String  @id @default(uuid())
+  userId            String
+  user              Users   @relation(fields: [userId], references: [id])
+  title             String
+  firstName         String?
+  middleName        String?
+  lastName          String?
+  country           String?
+  phoneNumber       String?
+  resumeEmail       String?
+  linkedIn          String?
+  github            String?
+  personalPortfolio String?
+  leetCode          String?
+  codingProfile2    String?
+  codingProfile3    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  summary String
+
+  education    Education[]
+  experience   Experience[]
+  projects      Projects[]
+  skills       Skills[]
+  achievements Achievements[]
+  pors         Por[]
+  publications Publications[]
+
+  @@index([userId])
+}
+
+model Education {
+  id       String @id @default(uuid())
+  resumeId String
+
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  instituteName String
+  level         String?
+  startDate     DateTime
+  endDate       DateTime
+  location      String
+  degree        String
+  branch        String
+
+  @@index([resumeId])
+}
+
+model Experience {
+  id       String @id @default(uuid())
+  resumeId String
+
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  companyName String
+  startDate   DateTime
+  endDate     DateTime
+  position    String
+  description String
+  proofLink   String
+
+  @@index([resumeId])
+}
+
+model Projects {
+  id       String @id @default(uuid())
+  resumeId String
+
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  projectName String
+  description String
+  githubLink  String
+  liveLink    String
+  startDate   DateTime
+  endDate     DateTime
+
+  @@index([resumeId])
+}
+
+model Skills {
+  id       String @id @default(uuid())
+  resumeId String
+
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  name     String
+  category String?
+
+  @@index([resumeId])
+}
+
+model Achievements {
+  id       String @id @default(uuid())
+  resumeId String
+
+  resume      Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  title       String
+  org         String
+  date        DateTime
+  description String
+
+  @@index([resumeId])
+}
+
+model Por {
+  id       String @id @default(uuid())
+  resumeId String
+
+  resume      Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  title       String
+  org         String
+  startDate   DateTime
+  endDate     DateTime
+  description String
+
+  @@index([resumeId])
+}
+
+model Publications {
+  id       String @id @default(uuid())
+  resumeId String
+
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  authors         String
+  title           String
+  conference      String
+  place           String
+  publicationDate DateTime
+  description     String
+
+  @@index([resumeId])
+}
