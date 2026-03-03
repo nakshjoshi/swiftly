@@ -22,7 +22,7 @@ export type CredentialUser = BaseUser & {
 }
 
 export type OAuthUser = BaseUser & {
-    provider: "credentials"
+    provider: string
     providerId:string
     hashedPassword: never
 }

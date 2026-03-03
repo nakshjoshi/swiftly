@@ -8,7 +8,7 @@ class AuthService{
 
     public async findUserbyEmail(email:string){
         try {
-            const user = await prisma.users.findUnique({
+            const user = await prisma.user.findUnique({
                 where:{email:email}
             })
     
@@ -18,6 +18,7 @@ class AuthService{
             throw new ApiError(404,"Email ID doesn't exist")
             
         }
+        
     }
 
 
@@ -26,16 +27,12 @@ class AuthService{
         return await prisma.$transaction(async(tx)=>{
 
 
-            const existingUser = await tx.users.findUnique({
+            const existingUser = await tx.user.findUnique({
                 where:{email:data.email}
             })
 
             if(existingUser){
-                return {
-                    success:false,
-                    message: "user with this email already exists",
-                    data:null
-                }
+                throw new ApiError(409, "User already exists")
             }
 
 
@@ -44,7 +41,7 @@ class AuthService{
 
             //create user
 
-            const user = tx.users.create({
+            const user = await tx.user.create({
                 data:{
                     email: data.email,
                     fullName: data.fullName,
@@ -58,13 +55,29 @@ class AuthService{
 
 
             if(data.provider=="credentials"){
-                
+
+                await tx.authAccount.create({
+                    data:{
+                        userId: user.id,
+                        provider:"credentials",
+                        passwordHash: data.hashedPassword
+                    }
+                })
+
+            } else{
+                await tx.authAccount.create({
+                    data:{
+                        userId: user.id,
+                        provider: data.provider,
+                        providerId:data.providerId
+                    }
+                })
             }
 
 
 
 
-
+            return user
 
         })
 
