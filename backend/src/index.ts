@@ -1,4 +1,5 @@
 import express from 'express'
+import { generateOtp } from './utils/otp.utils'
 
 const port = process.env.PORT || 3001
 
@@ -13,6 +14,6 @@ app.listen(port, ()=>{
     console.log(`App running on http://localhost:${port}`)
 })
 
-
+console.log(generateOtp())
 
 // console.log(accessTokenSecret, refreshTokenSecret)
