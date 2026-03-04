@@ -2,6 +2,7 @@ import express from 'express'
 import { generateOtp } from './utils/otp.utils'
 import cookieParser from 'cookie-parser'
 import authRouter from './routes/auth.routes'
+import resumeRouter from './routes/resume.routes'
 
 
 const port = process.env.PORT || 3001
@@ -15,6 +16,7 @@ app.use(cookieParser())
 
 
 app.use('/api/v1/auth', authRouter)
+app.use('/api/v1/resume', resumeRouter)
 
 app.get('/health', (req,res)=>{
     res.send('Hello...I am under the water, here too much cold.......')
