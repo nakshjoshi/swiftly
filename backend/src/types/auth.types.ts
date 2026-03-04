@@ -1,3 +1,5 @@
+import type { Request } from "express";
+
 export type BaseUser = {
     fullName:string
     email:string
@@ -25,7 +27,13 @@ export type createUserInput = CredentialUser | OAuthUser
 export type SignIn ={
 
     email:string
-    password:string
+    hashedPassword:string
     provider:string
 
+}
+
+
+
+export interface AuthRequest extends Request {
+  userId?: any;
 }

@@ -14,20 +14,19 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  fullName  String?
-  phone     String
-  avatarUrl String?
+  id           String  @id @default(uuid())
+  email        String  @unique
+  fullName     String?
+  phone        String
+  avatarUrl    String?
   refreshToken String?
-
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-
   authAccount AuthAccount[]
   resume      Resume[]
+  sessions    Session[]
 }
 
 model AuthAccount {
@@ -41,8 +40,20 @@ model AuthAccount {
   passwordHash String?
   createdAt    DateTime @default(now())
 
-  @@index([userId])
   @@unique([userId, provider])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  refreshToken String
+  device       String?
+  ip           String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Resume {
@@ -70,7 +81,7 @@ model Resume {
 
   education    Education[]
   experience   Experience[]
-  projects      Projects[]
+  projects     Projects[]
   skills       Skills[]
   achievements Achievements[]
   pors         Por[]

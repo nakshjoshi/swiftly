@@ -1,7 +1,7 @@
 import prisma from "../config/prisma";
 import type { createUserInput } from "../types/auth.types";
 import { ApiError } from "../utils/apiError.utils";
-import { hashPassword } from "../utils/bcrypt.utils";
+import { hash, hashPassword, verifyHash, verifyPassword } from "../utils/bcrypt.utils";
 
 
 
@@ -96,19 +96,35 @@ export class AuthService{
 
 
     public async saveRefreshToken(userId:string, token:string){
-        return await prisma.user.update({
 
-            where:{id:userId},
-            data:{refreshToken:token}
+        const hashedToken = await hash(token)
+        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+
+        return await prisma.session.create({
+            data:{
+                userId:userId,
+                refreshToken: hashedToken,
+                expiresAt: expiresAt
+            }
         })
     }
     
     public async deleteRefreshToken(userId:string, token:string){
-        return await prisma.user.updateMany({
 
-            where:{id:userId, refreshToken: token},
-            data:{refreshToken:null}
+        const sessions = await prisma.session.findMany({
+            where:{userId:userId}
         })
+
+        for(const i of sessions){
+            const isValid = await verifyHash(token, i.refreshToken)
+
+            if(isValid){
+                await prisma.session.delete({
+                    where:{id:i.id}
+                })
+            }
+        }
+        
     }
 
 

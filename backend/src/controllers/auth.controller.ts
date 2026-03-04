@@ -1,16 +1,19 @@
 import type { CookieOptions, Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler.utils";
-import type { createUserInput, SignIn } from "../types/auth.types";
+import type { AuthRequest, createUserInput, SignIn } from "../types/auth.types";
 import { ApiError } from "../utils/apiError.utils";
 import { AuthService } from "../services/auth.service";
 import { ApiResponse } from "../utils/apiResponse.utils";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwt.utils";
 import { hash, verifyPassword } from "../utils/bcrypt.utils";
+import cookieParser from "cookie-parser";
 
 
 const Auth = new AuthService()
 
 export const signUp = asyncHandler(async (req: Request, res: Response)=>{
+
+    console.log(req.body)
 
     const {email, fullName, phone, provider, providerId, hashedPassword}:createUserInput = req.body
 
@@ -32,10 +35,8 @@ export const signUp = asyncHandler(async (req: Request, res: Response)=>{
     const createdUser = await Auth.createUser(data)
     const accessToken = generateAccessToken(createdUser.id)
     const refreshToken = generateRefreshToken(createdUser.id)
-
-    const hashedRefreshToken = await hash(refreshToken)
     
-    await Auth.saveRefreshToken(createdUser.id, hashedRefreshToken)
+    await Auth.saveRefreshToken(createdUser.id, refreshToken)
 
     const options : CookieOptions= {
         httpOnly: true,
@@ -47,26 +48,28 @@ export const signUp = asyncHandler(async (req: Request, res: Response)=>{
             .status(201)
             .cookie("accessToken", accessToken,options)
             .cookie("refreshToken", refreshToken, options)
-            .json(new ApiResponse(201, createdUser, "User registered successfully"))
+            .json(new ApiResponse(201, createdUser.email, "User registered successfully"))
 
 })
 
 
 export const signIn = asyncHandler(async(req:Request, res: Response)=>{
 
-    const {email, password, provider}:SignIn = req.body
+    // console.log(req.body)
 
-    if(!email?.trim() || !password?.trim()){
+    const {email, hashedPassword, provider}:SignIn = req.body
+
+    if(!email?.trim() || !hashedPassword?.trim()){
         throw new ApiError(400, "Email and Password are required")
     }
 
     const userData: SignIn = {
         email: email.trim().toLowerCase(),
-        password: password,
+        hashedPassword: hashedPassword,
         provider:provider
     }
 
-    if(!email.trim().toLowerCase() || !password.trim()){
+    if(!email.trim().toLowerCase() || !hashedPassword.trim()){
         throw new ApiError(400, "Email and Password are required")
     }
 
@@ -77,22 +80,47 @@ export const signIn = asyncHandler(async(req:Request, res: Response)=>{
         throw new ApiError(400, "user does not exist")
     }
 
-    const isPasswordValid = await verifyPassword(userData.password, userAuthDetails?.passwordHash as string )
+    const isPasswordValid = await verifyPassword(userData.hashedPassword, userAuthDetails?.passwordHash as string )
+
+    const options : CookieOptions= {
+        httpOnly: true,
+        // secure: true,
+        sameSite: "strict",
+    }
+
+    if(isPasswordValid){
+        const accessToken = generateAccessToken(user.id)
+        const refreshToken = generateRefreshToken(user.id)
+        await Auth.saveRefreshToken(user.id, refreshToken)
+
+        res
+            .cookie("accessToken", accessToken,options)
+            .cookie("refreshToken", refreshToken, options)
+            .json(new ApiResponse(201,null,"loggedIn"))
+
+    }
+
+    if(!isPasswordValid){
+        throw new ApiError(401, "Wrong Password")
+    }
     
 })
 
 
-export const logout = asyncHandler(async(req:Request, res:Response)=>{
+export const logout = asyncHandler(async(req:AuthRequest, res:Response)=>{
 
-    const userId = req.body.userId
-    req.cookies.accessToken
-
-    await Auth.deleteRefreshToken(userId, req.cookies.refreshToken)
+    const userId = req.userId
 
 
-    res.clearCookie("accessToken")
-    res.clearCookie("refreshToken")
+    
+    const user = await Auth.deleteRefreshToken(userId, req.cookies.refreshToken)
 
+
+    res
+        .status(401)
+        // .clearCookie("accessToken")
+        // .clearCookie("refreshToken")
+        .json(`cookies cleared ${user}`)
     
 
 

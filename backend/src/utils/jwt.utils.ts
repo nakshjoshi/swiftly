@@ -36,7 +36,7 @@ const generateRefreshToken = (userId:string)=>{
 const verifyAccessToken = (token: string): User | null => {
     try {
         const decoded = jwt.verify(token, accessTokenSecret) as any;
-        if (decoded && decoded.username) {
+        if (decoded && decoded.userId) {
             return decoded as User;
         }
         return null;
@@ -51,7 +51,7 @@ const verifyRefreshToken = (token:string)=>{
     try {
         const decoded = jwt.verify(token, refreshTokenSecret) as any
     
-        if(decoded && decoded.username ){
+        if(decoded && decoded.userId ){
             return generateAccessToken(decoded.id)
         }
     } catch (error) {
