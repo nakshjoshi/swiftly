@@ -17,6 +17,7 @@
   "dependencies": {
     "@prisma/client": "^7.4.2",
     "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "bcrypt": "^6.0.0",

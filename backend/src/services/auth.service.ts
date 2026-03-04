@@ -1,6 +1,7 @@
 import prisma from "../config/prisma";
 import type { createUserInput } from "../types/auth.types";
 import { ApiError } from "../utils/apiError.utils";
+import { hashPassword } from "../utils/bcrypt.utils";
 
 
 
@@ -23,6 +24,12 @@ export class AuthService{
 
 
     public async createUser(data:createUserInput){
+
+
+        if(data.hashedPassword){
+                let newHashedPassword = await hashPassword(data.hashedPassword)
+                data.hashedPassword = newHashedPassword
+            }
 
         return await prisma.$transaction(async(tx)=>{
 
@@ -52,6 +59,9 @@ export class AuthService{
 
 
             // create auth
+
+
+            
 
 
             if(data.provider=="credentials"){
@@ -90,6 +100,27 @@ export class AuthService{
 
             where:{id:userId},
             data:{refreshToken:token}
+        })
+    }
+    
+    public async deleteRefreshToken(userId:string, token:string){
+        return await prisma.user.updateMany({
+
+            where:{id:userId, refreshToken: token},
+            data:{refreshToken:null}
+        })
+    }
+
+
+    public async getUserAuthAccount(userId:string, provider:string){
+        return await prisma.authAccount.findUnique({
+            where:{
+
+                userId_provider:{
+                userId:userId,
+                provider:provider
+                }
+            }
         })
     }
 }

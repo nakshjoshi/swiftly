@@ -42,7 +42,7 @@ model AuthAccount {
   createdAt    DateTime @default(now())
 
   @@index([userId])
-  @@unique([provider, providerId])
+  @@unique([userId, provider])
 }
 
 model Resume {

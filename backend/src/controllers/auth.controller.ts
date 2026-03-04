@@ -1,16 +1,16 @@
 import type { CookieOptions, Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler.utils";
-import type { createUserInput } from "../types/auth.types";
+import type { createUserInput, SignIn } from "../types/auth.types";
 import { ApiError } from "../utils/apiError.utils";
 import { AuthService } from "../services/auth.service";
 import { ApiResponse } from "../utils/apiResponse.utils";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwt.utils";
-import { hash } from "../utils/bcrypt.utils";
+import { hash, verifyPassword } from "../utils/bcrypt.utils";
 
 
 const Auth = new AuthService()
 
-const signUp = asyncHandler(async (req: Request, res: Response)=>{
+export const signUp = asyncHandler(async (req: Request, res: Response)=>{
 
     const {email, fullName, phone, provider, providerId, hashedPassword}:createUserInput = req.body
 
@@ -52,3 +52,49 @@ const signUp = asyncHandler(async (req: Request, res: Response)=>{
 })
 
 
+export const signIn = asyncHandler(async(req:Request, res: Response)=>{
+
+    const {email, password, provider}:SignIn = req.body
+
+    if(!email?.trim() || !password?.trim()){
+        throw new ApiError(400, "Email and Password are required")
+    }
+
+    const userData: SignIn = {
+        email: email.trim().toLowerCase(),
+        password: password,
+        provider:provider
+    }
+
+    if(!email.trim().toLowerCase() || !password.trim()){
+        throw new ApiError(400, "Email and Password are required")
+    }
+
+    const user = await Auth.findUserbyEmail(userData.email)
+    const userAuthDetails = await Auth.getUserAuthAccount(user?.id as string, userData.provider )
+
+    if(!user){
+        throw new ApiError(400, "user does not exist")
+    }
+
+    const isPasswordValid = await verifyPassword(userData.password, userAuthDetails?.passwordHash as string )
+    
+})
+
+
+export const logout = asyncHandler(async(req:Request, res:Response)=>{
+
+    const userId = req.body.userId
+    req.cookies.accessToken
+
+    await Auth.deleteRefreshToken(userId, req.cookies.refreshToken)
+
+
+    res.clearCookie("accessToken")
+    res.clearCookie("refreshToken")
+
+    
+
+
+
+})

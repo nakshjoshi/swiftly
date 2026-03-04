@@ -22,6 +22,10 @@ export type createUserInput = CredentialUser | OAuthUser
 
 
 
-export type SignUp ={
-    
+export type SignIn ={
+
+    email:string
+    password:string
+    provider:string
+
 }
