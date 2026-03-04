@@ -4,7 +4,7 @@ import { ApiError } from "../utils/apiError.utils";
 
 
 
-class AuthService{
+export class AuthService{
 
     public async findUserbyEmail(email:string){
         try {
@@ -15,7 +15,7 @@ class AuthService{
             return user;
         } catch (error) {
             
-            throw new ApiError(404,"Email ID doesn't exist")
+            throw new ApiError(404,"connection to DB failed")
             
         }
         
@@ -82,5 +82,14 @@ class AuthService{
         })
 
 
+    }
+
+
+    public async saveRefreshToken(userId:string, token:string){
+        return await prisma.user.update({
+
+            where:{id:userId},
+            data:{refreshToken:token}
+        })
     }
 }

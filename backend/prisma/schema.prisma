@@ -19,6 +19,7 @@ model User {
   fullName  String?
   phone     String
   avatarUrl String?
+  refreshToken String?
 
 
   createdAt DateTime @default(now())

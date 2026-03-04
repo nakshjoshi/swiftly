@@ -1,14 +1,3 @@
-export type createUser = {
-    fullName:string
-    email:string
-    phone:string
-    hashedPassword:string
-    provider:string
-    providerId:string | null
-
-}
-
-
 export type BaseUser = {
     fullName:string
     email:string
@@ -30,3 +19,9 @@ export type OAuthUser = BaseUser & {
 
 
 export type createUserInput = CredentialUser | OAuthUser
+
+
+
+export type SignUp ={
+    
+}

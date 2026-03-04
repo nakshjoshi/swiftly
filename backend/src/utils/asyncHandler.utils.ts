@@ -8,3 +8,6 @@ const asyncHandler = (fn:RequestHandler)=>{
             .catch((err)=>next(err))
     }
 }
+
+
+export {asyncHandler}

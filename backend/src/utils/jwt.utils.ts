@@ -9,9 +9,9 @@ const accessTokenExpiry = process.env.ACCESS_TOKEN_EXPIRY || '7d'
 const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET || 'myrefreshtoken'
 const refreshTokenExpiry = process.env.REFRESH_TOKEN_EXPIRY || '15d'
 
-const generateAccessToken = ()=>{
+const generateAccessToken = (userId:string)=>{
     return jwt.sign({
-        username: "user",
+        userId: userId,
         role: "user"
     } as JwtPayload,
     accessTokenSecret,{
@@ -20,9 +20,9 @@ const generateAccessToken = ()=>{
 }
 
 
-const generateRefreshToken = ()=>{
+const generateRefreshToken = (userId:string)=>{
     return jwt.sign({
-        username:"user",
+        userId:userId,
         role:"user"
 
     }as JwtPayload, refreshTokenSecret,
@@ -52,7 +52,7 @@ const verifyRefreshToken = (token:string)=>{
         const decoded = jwt.verify(token, refreshTokenSecret) as any
     
         if(decoded && decoded.username ){
-            return generateAccessToken()
+            return generateAccessToken(decoded.id)
         }
     } catch (error) {
         
