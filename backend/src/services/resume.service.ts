@@ -6,6 +6,9 @@ import mammoth from 'mammoth'
 export class ResumeService{ 
 
 
+    //// ask array of object from ai in correct order phir unn array ke upar look chlado or like aise resume ke liye 
+    // jisme kuch data missing hoga usme blank objects nhin key daalke value empty string
+
     public async parsePDF(resumePath:string){
         const bufferFile = await fs.promises.readFile(resumePath)
         const parser = new PDFParse({data: bufferFile})
@@ -39,16 +42,16 @@ export class ResumeService{
 
     public cleanLatex(text: string) {
 
-  const start = text.indexOf("\\begin{document}")
-  if (start !== -1) {
-    text = text.slice(start)
-  }
+        const start = text.indexOf("\\begin{document}")
+        if (start !== -1) {
+            text = text.slice(start)
+        }
 
-  return text
-    .replace(/\\href\{(.*?)\}\{(.*?)\}/g, "$2: $1")
-    .replace(/\\section\{(.*?)\}/g, "\n$1\n")
-    .replace(/\\textbf\{(.*?)\}/g, "$1")
-    .replace(/\\emph\{(.*?)\}/g, "$1")
+        return text
+            .replace(/\\href\{(.*?)\}\{(.*?)\}/g, "$2: $1")
+            .replace(/\\section\{(.*?)\}/g, "\n$1\n")
+            .replace(/\\textbf\{(.*?)\}/g, "$1")
+            .replace(/\\emph\{(.*?)\}/g, "$1")
 }
 
     public async parseTex(resumePath:string){
