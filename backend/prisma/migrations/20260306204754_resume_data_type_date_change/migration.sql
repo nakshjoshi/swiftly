@@ -1,0 +1,21 @@
+-- AlterTable
+ALTER TABLE "Achievements" ALTER COLUMN "date" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "Education" ALTER COLUMN "startDate" SET DATA TYPE TEXT,
+ALTER COLUMN "endDate" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "Experience" ALTER COLUMN "startDate" SET DATA TYPE TEXT,
+ALTER COLUMN "endDate" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "Por" ALTER COLUMN "startDate" SET DATA TYPE TEXT,
+ALTER COLUMN "endDate" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "Projects" ALTER COLUMN "startDate" SET DATA TYPE TEXT,
+ALTER COLUMN "endDate" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "Publications" ALTER COLUMN "publicationDate" SET DATA TYPE TEXT;
