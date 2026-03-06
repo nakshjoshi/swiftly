@@ -22,16 +22,20 @@ export const uploadAndParseResume = asyncHandler( async( req: Request, res:Respo
     const ext = path.extname(resume.originalname).toLowerCase()
 
     if(resumeFileType === "pdf" || ext === ".pdf"){
-        await serviceResume.parsePDF(resumePath)
+        const text = await serviceResume.parsePDF(resumePath)
+        res.send(text)
 
 
     }
     else if(resumeFileType === 'docx' || ext === ".docx"){
-        await serviceResume.parseDocx(resumePath)
+        const text = await serviceResume.parseDocx(resumePath)
+        res.send(text)
+        
 
     }
     else if(ext === ".tex" || resumeFileType === "tex"){
-        await serviceResume.parseTex(resumePath)
+        const text = await serviceResume.parseTex(resumePath)
+        res.send(text)
 
     }
     else{
