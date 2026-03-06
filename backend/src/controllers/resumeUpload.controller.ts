@@ -52,8 +52,7 @@ export const uploadAndParseResume = asyncHandler( async( req: AuthRequest, res:R
 
     const log = await serviceResume.pushLlmJsonOfResumeToRespectiveDbTables(userId, jsonResumeForPrisma)
 
-    const jsonLog = JSON.parse(log)
-    res.send(jsonLog)
+    res.send(log)
 
 
  

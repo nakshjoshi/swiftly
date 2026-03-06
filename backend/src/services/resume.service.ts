@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import prisma from "../config/prisma";
 import { PDFParse } from 'pdf-parse'
 import mammoth from 'mammoth'
+import { ApiError } from '../utils/apiError.utils';
 
 
 export class ResumeService{ 
@@ -9,14 +10,66 @@ export class ResumeService{
 
 
     public async pushLlmJsonOfResumeToRespectiveDbTables(userId:string, llmJson:string){
+        let jsonDataResume
+        
+        try {
+            jsonDataResume = JSON.parse(llmJson)
+        } catch (error) {
 
-        return (
-            `${llmJson}`
-        )
+            throw new ApiError(400, "Invalid Json Data")
+            
+        }
+
+        const result = await prisma.resume.create({
+            data:{
+                userId: userId,
+                title: jsonDataResume.title,
+                firstName: jsonDataResume.firstName,
+                middleName: jsonDataResume.middleName,
+                lastName: jsonDataResume.lastName,
+                country:jsonDataResume.country,
+                phoneNumber:jsonDataResume.phoneNumber,
+                resumeEmail:jsonDataResume.resumeEmail,
+                linkedIn: jsonDataResume.linkedIn,
+                github:jsonDataResume.github,
+                personalPortfolio:jsonDataResume.personalPortfolio,
+                leetCode:jsonDataResume.leetCode,
+                codingProfile2:jsonDataResume.codingProfile2,
+                codingProfile3:jsonDataResume.codingProfile3,
+                summary:jsonDataResume.summary,
+
+                education: jsonDataResume.education?.length
+                  ? { create: jsonDataResume.education }
+                  : undefined,
+
+                experience: jsonDataResume.experience?.length
+                  ? { create: jsonDataResume.experience }
+                  : undefined,
+
+                projects: jsonDataResume.projects?.length
+                  ? { create: jsonDataResume.projects }
+                  : undefined,
+
+                skills: jsonDataResume.skills?.length
+                  ? { create: jsonDataResume.skills }
+                  : undefined,
+
+                achievements: jsonDataResume.achievements?.length
+                  ? { create: jsonDataResume.achievements }
+                  : undefined,
+
+                pors: jsonDataResume.pors?.length
+                  ? { create: jsonDataResume.pors }
+                  : undefined,
+
+                publications: jsonDataResume.publications?.length
+                  ? { create: jsonDataResume.publications }
+                  : undefined
 
 
-
-
+            }
+        })
+        return result
 
 
     }
