@@ -59,8 +59,9 @@ model Session {
 model Resume {
   id                String  @id @default(uuid())
   userId            String
+  name              String  @default("Resume-1")
   user              User    @relation(fields: [userId], references: [id])
-  title             String
+  title             String?
   firstName         String?
   middleName        String?
   lastName          String?
@@ -73,11 +74,12 @@ model Resume {
   leetCode          String?
   codingProfile2    String?
   codingProfile3    String?
+  summary           String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  summary String
+  
 
   education    Education[]
   experience   Experience[]
@@ -96,13 +98,13 @@ model Education {
 
   resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
 
-  instituteName String
+  instituteName String?
   level         String?
-  startDate     DateTime
-  endDate       DateTime
-  location      String
-  degree        String
-  branch        String
+  startDate     DateTime?
+  endDate       DateTime?
+  location      String?
+  degree        String?
+  branch        String?
 
   @@index([resumeId])
 }
@@ -113,12 +115,12 @@ model Experience {
 
   resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
 
-  companyName String
-  startDate   DateTime
-  endDate     DateTime
-  position    String
-  description String
-  proofLink   String
+  companyName String?
+  startDate   DateTime?
+  endDate     DateTime?
+  position    String?
+  description String?
+  proofLink   String?
 
   @@index([resumeId])
 }
@@ -129,12 +131,12 @@ model Projects {
 
   resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
 
-  projectName String
-  description String
-  githubLink  String
-  liveLink    String
-  startDate   DateTime
-  endDate     DateTime
+  projectName String?
+  description String?
+  githubLink  String?
+  liveLink    String?
+  startDate   DateTime?
+  endDate     DateTime?
 
   @@index([resumeId])
 }
@@ -145,7 +147,7 @@ model Skills {
 
   resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
 
-  name     String
+  name     String?
   category String?
 
   @@index([resumeId])
@@ -156,10 +158,10 @@ model Achievements {
   resumeId String
 
   resume      Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
-  title       String
-  org         String
-  date        DateTime
-  description String
+  title       String?
+  org         String?
+  date        DateTime?
+  description String?
 
   @@index([resumeId])
 }
@@ -169,11 +171,11 @@ model Por {
   resumeId String
 
   resume      Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
-  title       String
-  org         String
-  startDate   DateTime
-  endDate     DateTime
-  description String
+  title       String?
+  org         String?
+  startDate   DateTime?
+  endDate     DateTime?
+  description String?
 
   @@index([resumeId])
 }
@@ -184,12 +186,12 @@ model Publications {
 
   resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
 
-  authors         String
-  title           String
-  conference      String
-  place           String
-  publicationDate DateTime
-  description     String
+  authors         String?
+  title           String?
+  conference      String?
+  place           String?
+  publicationDate DateTime?
+  description     String?
 
   @@index([resumeId])
 }
