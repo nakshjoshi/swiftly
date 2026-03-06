@@ -13,6 +13,16 @@ datasource db {
   provider = "postgresql"
 }
 
+enum ExperienceType {
+  INTERNSHIP
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  FREELANCE
+  RESEARCH
+  VOLUNTEER
+}
+
 model User {
   id           String  @id @default(uuid())
   email        String  @unique
@@ -59,9 +69,8 @@ model Session {
 model Resume {
   id                String  @id @default(uuid())
   userId            String
-  name              String  @default("Resume-1")
   user              User    @relation(fields: [userId], references: [id])
-  title             String?
+  title             String? @default("Resume-1")
   firstName         String?
   middleName        String?
   lastName          String?
@@ -78,8 +87,6 @@ model Resume {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  
 
   education    Education[]
   experience   Experience[]
@@ -105,6 +112,7 @@ model Education {
   location      String?
   degree        String?
   branch        String?
+  grade         String?
 
   @@index([resumeId])
 }
@@ -116,6 +124,8 @@ model Experience {
   resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
 
   companyName String?
+  location    String?
+  type        ExperienceType
   startDate   DateTime?
   endDate     DateTime?
   position    String?
@@ -132,6 +142,7 @@ model Projects {
   resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
 
   projectName String?
+  techStack   String[]
   description String?
   githubLink  String?
   liveLink    String?
@@ -157,7 +168,7 @@ model Achievements {
   id       String @id @default(uuid())
   resumeId String
 
-  resume      Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  resume      Resume    @relation(fields: [resumeId], references: [id], onDelete: Cascade)
   title       String?
   org         String?
   date        DateTime?
@@ -170,7 +181,7 @@ model Por {
   id       String @id @default(uuid())
   resumeId String
 
-  resume      Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  resume      Resume    @relation(fields: [resumeId], references: [id], onDelete: Cascade)
   title       String?
   org         String?
   startDate   DateTime?

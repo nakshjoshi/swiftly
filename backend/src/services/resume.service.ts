@@ -1,4 +1,5 @@
 import fs from 'node:fs'
+import prisma from "../config/prisma";
 import { PDFParse } from 'pdf-parse'
 import mammoth from 'mammoth'
 
@@ -6,8 +7,19 @@ import mammoth from 'mammoth'
 export class ResumeService{ 
 
 
-    //// ask array of object from ai in correct order phir unn array ke upar look chlado or like aise resume ke liye 
-    // jisme kuch data missing hoga usme blank objects nhin key daalke value empty string
+
+    public async pushLlmJsonOfResumeToRespectiveDbTables(userId:string, llmJson:string){
+
+        return (
+            `${llmJson}`
+        )
+
+
+
+
+
+
+    }
 
     public async parsePDF(resumePath:string){
         const bufferFile = await fs.promises.readFile(resumePath)
@@ -64,8 +76,6 @@ export class ResumeService{
         return this.cleanLatex(text)
     }
 
-
-    /// write prisme.create services for all tables separately to be called in conroller or somewhere else 
 
 
 
