@@ -17,6 +17,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Swiftly - Apply to Jobs Faster",
   description: "Upload your resume once and reuse your information everywhere. Stop wasting time on repetitive job applications.",
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+  },
 };
 
 export default function RootLayout({
