@@ -30,7 +30,7 @@ export default function CTASection() {
               className="px-8 py-4 bg-white text-gray-900 text-lg font-medium rounded-full hover:bg-blue-50 transition-colors text-center shadow-xl group"
             >
               <span className="flex items-center justify-center gap-2">
-                Create Free Account
+                Create Account
                 <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>

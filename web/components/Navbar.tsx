@@ -16,7 +16,7 @@ export default function Navbar() {
             <div className="flex items-center gap-1">
               <span className="text-xl font-bold font-mono text-gray-900 group-hover:text-blue-600 transition-colors">Swiftly</span>
               {/* <span className="text-xl font-bold text-gray-900">ly</span> */}
-              <span className="text-xs font-mono text-gray-400 ml-1">.dev</span>
+              <span className="text-xs font-mono text-gray-400 ml-1">.nakshjoshi.in</span>
             </div>
           </Link>
 

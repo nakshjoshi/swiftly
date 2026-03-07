@@ -61,7 +61,7 @@ export default function Hero() {
             </div>
           </div>
 
-          <div className="relative lg:h-125 flex items-center justify-center">
+          <div className="relative lg:h-125 hidden lg:flex items-center justify-center">
             <div className="relative w-full h-full">
               {/* Visual representation */}
               <div className="absolute inset-0 flex items-center justify-center">
