@@ -22,15 +22,15 @@ export default function Navbar() {
 
           {/* Navigation links with code style */}
           <div className="hidden md:flex items-center space-x-1">
-            <Link href="#how-it-works" className="px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-mono text-sm relative group">
+            <Link href="/#how-it-works" className="px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-mono text-sm relative group">
               <span className="relative z-10">howItWorks()</span>
               <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300"></div>
             </Link>
-            <Link href="#features" className="px-4 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors font-mono text-sm relative group">
+            <Link href="/#features" className="px-4 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors font-mono text-sm relative group">
               <span className="relative z-10">features()</span>
               <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-green-600 group-hover:w-full transition-all duration-300"></div>
             </Link>
-            <Link href="#benefits" className="px-4 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors font-mono text-sm relative group">
+            <Link href="/#benefits" className="px-4 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors font-mono text-sm relative group">
               <span className="relative z-10">benefits()</span>
               <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-red-600 group-hover:w-full transition-all duration-300"></div>
             </Link>

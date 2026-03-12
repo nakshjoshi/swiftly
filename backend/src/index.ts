@@ -3,12 +3,19 @@ import { generateOtp } from './utils/otp.utils'
 import cookieParser from 'cookie-parser'
 import authRouter from './routes/auth.routes'
 import resumeRouter from './routes/resume.routes'
+import cors from "cors"
 
 
 const port = process.env.PORT || 3001
 
 
 const app = express()
+
+app.use(cors({
+    origin:"http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+}))
 
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
