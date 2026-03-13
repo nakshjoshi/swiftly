@@ -137,7 +137,6 @@ export default function DashboardPage() {
                 const name = [resume.firstName, resume.middleName, resume.lastName].filter(Boolean).join(' ');
                 return (
                   <article key={resume.id} className="rounded-xl border-2 border-gray-200 bg-white p-4 shadow-sm hover:border-blue-400 transition-colors">
-                    <p className="text-xs font-mono text-blue-600 mb-1">resume.id = {resume.id}</p>
                     <h3 className="text-lg font-semibold text-gray-900">
                       {resume.title || name || 'Untitled Resume'}
                     </h3>

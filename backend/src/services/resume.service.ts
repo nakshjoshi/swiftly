@@ -23,7 +23,7 @@ export class ResumeService{
         const result = await prisma.resume.create({
             data:{
                 userId: userId,
-                title: jsonDataResume.title,
+                title: jsonDataResume.title ||"Resume 1",
                 firstName: jsonDataResume.firstName,
                 middleName: jsonDataResume.middleName,
                 lastName: jsonDataResume.lastName,
