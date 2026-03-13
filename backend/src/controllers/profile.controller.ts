@@ -20,3 +20,17 @@ export const fetchResumeForUser = asyncHandler(async(req:AuthRequest, res: Respo
         .json(new ApiResponse(200, result, "Resume fetched successfully"))
 
 })  
+
+
+export const fetchFullDetailsOfOneResume = asyncHandler(async(req:AuthRequest, res: Response)=>{
+    const userId = req.userId!
+    const resumeId = req.params.resumeId
+
+    const result = await resumeService.fetchOneFullResumeForUser(userId, resumeId as string)
+
+    // console.log(result[0])
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, result, "Resume fetched successfully"))
+})

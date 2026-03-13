@@ -136,22 +136,25 @@ export default function DashboardPage() {
               {resumes.map((resume) => {
                 const name = [resume.firstName, resume.middleName, resume.lastName].filter(Boolean).join(' ');
                 return (
-                  <article key={resume.id} className="rounded-xl border-2 border-gray-200 bg-white p-4 shadow-sm hover:border-blue-400 transition-colors">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {resume.title || name || 'Untitled Resume'}
-                    </h3>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {resume.resumeEmail || 'No email available'}
-                    </p>
-                    <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                      {resume.country ? (
-                        <span className="px-2 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">{resume.country}</span>
-                      ) : null}
-                      {resume.phoneNumber ? (
-                        <span className="px-2 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">{resume.phoneNumber}</span>
-                      ) : null}
-                    </div>
-                  </article>
+                  <Link key={resume.id} href={`/dashboard/resume/${resume.id}`}>
+                    <article className="rounded-xl border-2 border-gray-200 bg-white p-4 shadow-sm hover:border-blue-400 hover:shadow-md transition-all cursor-pointer group">
+                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
+                        {resume.title || name || 'Untitled Resume'}
+                      </h3>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {resume.resumeEmail || 'No email available'}
+                      </p>
+                      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                        {resume.country ? (
+                          <span className="px-2 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">{resume.country}</span>
+                        ) : null}
+                        {resume.phoneNumber ? (
+                          <span className="px-2 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">{resume.phoneNumber}</span>
+                        ) : null}
+                        <span className="ml-auto font-mono text-gray-400 group-hover:text-blue-500 transition-colors text-xs">view →</span>
+                      </div>
+                    </article>
+                  </Link>
                 );
               })}
             </div>

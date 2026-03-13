@@ -144,6 +144,33 @@ export class ResumeService{
 
     }
 
+    public async fetchOneFullResumeForUser(userId:string, resumeId:string){
+
+    
+        const result = await prisma.resume.findMany({
+            where:{
+                userId: userId,
+                id: resumeId
+            },
+            include:{
+                education: true,
+                experience: true,
+                projects: true,
+                skills: true,
+                achievements: true,
+                pors: true,
+                publications: true
+            }
+        }
+        )
+
+        return result
+
+    }
+
+    
+
+
 
 
 }

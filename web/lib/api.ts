@@ -36,9 +36,190 @@ export interface ResumeRecord {
   linkedIn?: string | null;
   github?: string | null;
   personalPortfolio?: string | null;
+  leetCode?: string | null;
+  codingProfile2?: string | null;
+  codingProfile3?: string | null;
   summary?: string | null;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface EducationRecord {
+  id: string;
+  resumeId: string;
+  instituteName?: string | null;
+  level?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  location?: string | null;
+  degree?: string | null;
+  branch?: string | null;
+  grade?: string | null;
+}
+
+export interface ExperienceRecord {
+  id: string;
+  resumeId: string;
+  companyName?: string | null;
+  location?: string | null;
+  type?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  position?: string | null;
+  description?: string | null;
+  proofLink?: string | null;
+}
+
+export interface ProjectRecord {
+  id: string;
+  resumeId: string;
+  projectName?: string | null;
+  techStack?: string[];
+  description?: string | null;
+  githubLink?: string | null;
+  liveLink?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+}
+
+export interface SkillRecord {
+  id: string;
+  resumeId: string;
+  name?: string | null;
+  category?: string | null;
+}
+
+export interface AchievementRecord {
+  id: string;
+  resumeId: string;
+  title?: string | null;
+  org?: string | null;
+  date?: string | null;
+  description?: string | null;
+}
+
+export interface PorRecord {
+  id: string;
+  resumeId: string;
+  title?: string | null;
+  org?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  description?: string | null;
+}
+
+export interface PublicationRecord {
+  id: string;
+  resumeId: string;
+  authors?: string | null;
+  title?: string | null;
+  conference?: string | null;
+  place?: string | null;
+  publicationDate?: string | null;
+  description?: string | null;
+}
+
+export interface ResumeDetailRecord extends ResumeRecord {
+  education: EducationRecord[];
+  experience: ExperienceRecord[];
+  projects: ProjectRecord[];
+  skills: SkillRecord[];
+  achievements: AchievementRecord[];
+  pors: PorRecord[];
+  publications: PublicationRecord[];
+}
+
+export interface UpdateResumePayload {
+  id: string;
+  title?: string | null;
+  firstName?: string | null;
+  middleName?: string | null;
+  lastName?: string | null;
+  country?: string | null;
+  phoneNumber?: string | null;
+  resumeEmail?: string | null;
+  linkedIn?: string | null;
+  github?: string | null;
+  personalPortfolio?: string | null;
+  leetCode?: string | null;
+  codingProfile2?: string | null;
+  codingProfile3?: string | null;
+  summary?: string | null;
+}
+
+export interface UpdateEducationPayload {
+  resumeId: string;
+  educationId: string;
+  instituteName?: string | null;
+  level?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  location?: string | null;
+  degree?: string | null;
+  branch?: string | null;
+  grade?: string | null;
+}
+
+export interface UpdateExperiencePayload {
+  resumeId: string;
+  experienceId: string;
+  companyName?: string | null;
+  location?: string | null;
+  type?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  position?: string | null;
+  description?: string | null;
+  proofLink?: string | null;
+}
+
+export interface UpdateProjectPayload {
+  resumeId: string;
+  projectId: string;
+  projectName?: string | null;
+  techStack?: string[];
+  description?: string | null;
+  githubLink?: string | null;
+  liveLink?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+}
+
+export interface UpdateSkillPayload {
+  resumeId: string;
+  skillId: string;
+  name?: string | null;
+  category?: string | null;
+}
+
+export interface UpdateAchievementPayload {
+  resumeId: string;
+  achievementId: string;
+  title?: string | null;
+  org?: string | null;
+  date?: string | null;
+  description?: string | null;
+}
+
+export interface UpdatePorPayload {
+  resumeId: string;
+  porId: string;
+  title?: string | null;
+  org?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  description?: string | null;
+}
+
+export interface UpdatePublicationPayload {
+  resumeId: string;
+  publicationId: string;
+  authors?: string | null;
+  title?: string | null;
+  conference?: string | null;
+  place?: string | null;
+  publicationDate?: string | null;
+  description?: string | null;
 }
 
 class ApiError extends Error {
@@ -108,6 +289,15 @@ export const resumeApi = {
     }
   },
 
+  fetchResumeById: async (resumeId: string): Promise<ApiResponse<ResumeDetailRecord>> => {
+    try {
+      const response = await apiClient.get<ApiResponse<ResumeDetailRecord>>(`/api/v1/fetch/fetchResumeById/${resumeId}`);
+      return response.data;
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
   uploadAndParse: async (resumeFile: File): Promise<unknown> => {
     try {
       const formData = new FormData();
@@ -119,6 +309,80 @@ export const resumeApi = {
         },
       });
 
+      return response.data;
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+};
+
+export const updateApi = {
+  updateResume: async (data: UpdateResumePayload): Promise<ApiResponse<ResumeRecord>> => {
+    try {
+      const response = await apiClient.post<ApiResponse<ResumeRecord>>('/api/v1/update/updateResume', data);
+      return response.data;
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
+  updateEducation: async (data: UpdateEducationPayload): Promise<ApiResponse<EducationRecord>> => {
+    try {
+      const response = await apiClient.post<ApiResponse<EducationRecord>>('/api/v1/update/updateEducation', data);
+      return response.data;
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
+  updateExperience: async (data: UpdateExperiencePayload): Promise<ApiResponse<ExperienceRecord>> => {
+    try {
+      const response = await apiClient.post<ApiResponse<ExperienceRecord>>('/api/v1/update/updateExperience', data);
+      return response.data;
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
+  updateProject: async (data: UpdateProjectPayload): Promise<ApiResponse<ProjectRecord>> => {
+    try {
+      const response = await apiClient.post<ApiResponse<ProjectRecord>>('/api/v1/update/updateProjects', data);
+      return response.data;
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
+  updateSkill: async (data: UpdateSkillPayload): Promise<ApiResponse<SkillRecord>> => {
+    try {
+      const response = await apiClient.post<ApiResponse<SkillRecord>>('/api/v1/update/updateSkills', data);
+      return response.data;
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
+  updateAchievement: async (data: UpdateAchievementPayload): Promise<ApiResponse<AchievementRecord>> => {
+    try {
+      const response = await apiClient.post<ApiResponse<AchievementRecord>>('/api/v1/update/updateAchievements', data);
+      return response.data;
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
+  updatePor: async (data: UpdatePorPayload): Promise<ApiResponse<PorRecord>> => {
+    try {
+      const response = await apiClient.post<ApiResponse<PorRecord>>('/api/v1/update/updatePor', data);
+      return response.data;
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
+  updatePublication: async (data: UpdatePublicationPayload): Promise<ApiResponse<PublicationRecord>> => {
+    try {
+      const response = await apiClient.post<ApiResponse<PublicationRecord>>('/api/v1/update/updatePublications', data);
       return response.data;
     } catch (error) {
       handleAxiosError(error);
