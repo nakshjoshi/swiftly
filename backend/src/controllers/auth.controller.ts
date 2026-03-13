@@ -84,8 +84,10 @@ export const signIn = asyncHandler(async(req:Request, res: Response)=>{
 
     const options : CookieOptions= {
         httpOnly: true,
-        // secure: true,
-        sameSite: "strict",
+        secure: true,
+        sameSite: "none",
+        domain: ".swiftly.nakshjoshi.in",
+        path: "/"
     }
 
     if(isPasswordValid){
