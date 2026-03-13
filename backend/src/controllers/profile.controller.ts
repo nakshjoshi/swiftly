@@ -34,3 +34,16 @@ export const fetchFullDetailsOfOneResume = asyncHandler(async(req:AuthRequest, r
         .status(200)
         .json(new ApiResponse(200, result, "Resume fetched successfully"))
 })
+
+
+export const deleteResumeForUser = asyncHandler(async(req:AuthRequest, res:Response)=>{
+    const userId = req.userId!
+    const resumeId = req.params.resumeId
+
+    const result = await resumeService.deleteResumeForUser(userId, resumeId as string)
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, result, "Resume deleted successfully"))
+
+})

@@ -167,6 +167,22 @@ export class ResumeService{
         return result
 
     }
+    
+
+    public async deleteResumeForUser(userId:string, resumeId:string){
+
+    
+        const result = await prisma.resume.delete({
+            where:{
+                userId: userId,
+                id: resumeId
+            }
+        }
+        )
+
+        return result
+
+    }
 
     
 
