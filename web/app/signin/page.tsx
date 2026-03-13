@@ -37,10 +37,13 @@ export default function SignInPage() {
         provider: 'credentials',
       });
 
-      enqueueSnackbar(response.message || 'Logged in successfully', { variant: 'success' });
+      if(response.message ==="loggedIn"){
+        enqueueSnackbar('Logged in successfully', { variant: 'success' });
+      }
+      
 
       setTimeout(() => {
-        router.push('/');
+        router.push('/dashboard');
       }, 700);
     } catch (error) {
       if (error instanceof ApiError) {
@@ -92,7 +95,7 @@ export default function SignInPage() {
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 transition-all font-sans bg-white text-gray-900 placeholder:text-gray-500 caret-gray-900"
-                placeholder="john@example.com"
+                placeholder="user@swiftly.nakshjoshi.in"
               />
             </div>
 

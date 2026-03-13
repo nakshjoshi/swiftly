@@ -1,0 +1,22 @@
+import { ResumeService } from "../services/resume.service";
+import type { AuthRequest } from "../types/auth.types";
+import { ApiResponse } from "../utils/apiResponse.utils";
+import type { CookieOptions, Request, Response } from "express";
+import { asyncHandler } from "../utils/asyncHandler.utils";
+
+const resumeService = new ResumeService()
+
+
+export const fetchResumeForUser = asyncHandler(async(req:AuthRequest, res: Response)=>{
+    
+    const userId = req.userId!
+    const result = await resumeService.fetchResumeForUser(userId)
+
+    // console.log(userId, result)
+
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, result, "Resume fetched successfully"))
+
+})  

@@ -57,7 +57,7 @@ export default function SignUpPage() {
       
       // Redirect to dashboard or home after successful signup
       setTimeout(() => {
-        router.push('/');
+        router.push('/dashboard');
       }, 1000);
       
     } catch (error) {
@@ -114,7 +114,7 @@ export default function SignUpPage() {
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 transition-all font-sans bg-white text-gray-900 placeholder:text-gray-500 caret-gray-900"
-                placeholder="John Doe"
+                placeholder="Naksh Joshi"
               />
             </div>
 
@@ -131,7 +131,7 @@ export default function SignUpPage() {
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 transition-all font-sans bg-white text-gray-900 placeholder:text-gray-500 caret-gray-900"
-                placeholder="john@example.com"
+                placeholder="user@swiftly.nakshjoshi.in"
               />
             </div>
 
@@ -145,9 +145,10 @@ export default function SignUpPage() {
                 id="phone"
                 name="phone"
                 value={formData.phone}
+                maxLength={10}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-green-600 focus:ring-2 focus:ring-green-500/20 transition-all font-sans bg-white text-gray-900 placeholder:text-gray-500 caret-gray-900"
-                placeholder="+1 (555) 123-4567"
+                placeholder="+91 12345 67890"
               />
             </div>
 

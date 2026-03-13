@@ -130,6 +130,19 @@ export class ResumeService{
     }
 
 
+    public async fetchResumeForUser(userId:string){
+
+    
+        const result = await prisma.resume.findMany({
+            where:{
+                userId: userId
+            }
+        }
+        )
+
+        return result
+
+    }
 
 
 

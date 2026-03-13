@@ -4,6 +4,8 @@ import cookieParser from 'cookie-parser'
 import authRouter from './routes/auth.routes'
 import resumeRouter from './routes/resume.routes'
 import cors from "cors"
+import updateRouter from './routes/update.routes'
+import fetchRouter from './routes/fetch.routes'
 
 
 const port = process.env.PORT || 3001
@@ -24,6 +26,8 @@ app.use(cookieParser())
 
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/resume', resumeRouter)
+app.use('/api/v1/update', updateRouter)
+app.use('/api/v1/fetch', fetchRouter)
 
 app.get('/health', (req,res)=>{
     res.send('Hello...I am under the water, here too much cold.......')
