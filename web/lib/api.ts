@@ -24,6 +24,23 @@ export interface SignInData {
   provider: 'credentials';
 }
 
+export interface ResumeRecord {
+  id: string;
+  title?: string | null;
+  firstName?: string | null;
+  middleName?: string | null;
+  lastName?: string | null;
+  country?: string | null;
+  resumeEmail?: string | null;
+  phoneNumber?: string | null;
+  linkedIn?: string | null;
+  github?: string | null;
+  personalPortfolio?: string | null;
+  summary?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 class ApiError extends Error {
   statusCode: number;
   
@@ -61,7 +78,7 @@ export const authApi = {
       handleAxiosError(error);
     }
   },
-  
+
   signIn: async (data: SignInData): Promise<ApiResponse> => {
     try {
       const response = await apiClient.post<ApiResponse>('/api/v1/auth/signin', data);
@@ -70,10 +87,38 @@ export const authApi = {
       handleAxiosError(error);
     }
   },
-  
+
   logout: async (): Promise<ApiResponse> => {
     try {
       const response = await apiClient.post<ApiResponse>('/api/v1/auth/logout');
+      return response.data;
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+};
+
+export const resumeApi = {
+  fetchResumeForUser: async (): Promise<ApiResponse<ResumeRecord[]>> => {
+    try {
+      const response = await apiClient.get<ApiResponse<ResumeRecord[]>>('/api/v1/fetch/fetchResumeForUser');
+      return response.data;
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
+  uploadAndParse: async (resumeFile: File): Promise<unknown> => {
+    try {
+      const formData = new FormData();
+      formData.append('resume', resumeFile);
+
+      const response = await apiClient.post('/api/v1/resume/uploadAndParse', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
       return response.data;
     } catch (error) {
       handleAxiosError(error);

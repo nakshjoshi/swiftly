@@ -117,7 +117,7 @@ export const logout = asyncHandler(async(req:AuthRequest, res:Response)=>{
 
 
     res
-        .status(401)
+        .status(200)
         .clearCookie("accessToken")
         .clearCookie("refreshToken")
         .json(`cookies cleared ${user}`)

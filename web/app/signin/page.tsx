@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSnackbar } from 'notistack';
-import { authApi, ApiError } from '@/lib/api';
+import { authApi, ApiError, resumeApi } from '@/lib/api';
 
 export default function SignInPage() {
   const router = useRouter();
@@ -14,6 +14,19 @@ export default function SignInPage() {
     email: '',
     password: '',
   });
+
+  useEffect(() => {
+    const checkExistingSession = async () => {
+      try {
+        await resumeApi.fetchResumeForUser();
+        router.push('/dashboard');
+      } catch (_error) {
+        return;
+      }
+    };
+
+    void checkExistingSession();
+  }, [router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
