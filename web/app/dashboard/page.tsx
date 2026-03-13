@@ -12,6 +12,7 @@ export default function DashboardPage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [deletingResumeId, setDeletingResumeId] = useState<string | null>(null);
   const [resumes, setResumes] = useState<ResumeRecord[]>([]);
 
   const loadResumes = useCallback(async () => {
@@ -54,6 +55,32 @@ export default function DashboardPage() {
       }
     } finally {
       setIsLoggingOut(false);
+    }
+  };
+
+  const handleDeleteResume = async (resumeId: string) => {
+    const shouldDelete = window.confirm('Delete this resume permanently?');
+    if (!shouldDelete) return;
+
+    setDeletingResumeId(resumeId);
+    try {
+      await resumeApi.deleteResumeById(resumeId);
+      setResumes((prev) => prev.filter((item) => item.id !== resumeId));
+      enqueueSnackbar('Resume deleted successfully', { variant: 'success' });
+    } catch (error) {
+      if (error instanceof ApiError && error.statusCode === 401) {
+        enqueueSnackbar('Please sign in again', { variant: 'warning' });
+        router.push('/signin');
+        return;
+      }
+
+      if (error instanceof ApiError) {
+        enqueueSnackbar(error.message, { variant: 'error' });
+      } else {
+        enqueueSnackbar('Failed to delete resume', { variant: 'error' });
+      }
+    } finally {
+      setDeletingResumeId(null);
     }
   };
 
@@ -135,9 +162,10 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {resumes.map((resume) => {
                 const name = [resume.firstName, resume.middleName, resume.lastName].filter(Boolean).join(' ');
+                const isDeletingThis = deletingResumeId === resume.id;
                 return (
-                  <Link key={resume.id} href={`/dashboard/resume/${resume.id}`}>
-                    <article className="rounded-xl border-2 border-gray-200 bg-white p-4 shadow-sm hover:border-blue-400 hover:shadow-md transition-all cursor-pointer group">
+                  <article key={resume.id} className="rounded-xl border-2 border-gray-200 bg-white p-4 shadow-sm hover:border-blue-400 hover:shadow-md transition-all group">
+                    <Link href={`/dashboard/resume/${resume.id}`} className="block cursor-pointer">
                       <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
                         {resume.title || name || 'Untitled Resume'}
                       </h3>
@@ -153,8 +181,19 @@ export default function DashboardPage() {
                         ) : null}
                         <span className="ml-auto font-mono text-gray-400 group-hover:text-blue-500 transition-colors text-xs">view →</span>
                       </div>
-                    </article>
-                  </Link>
+                    </Link>
+
+                    <div className="mt-4 flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => void handleDeleteResume(resume.id)}
+                        disabled={isDeletingThis}
+                        className="px-4 py-2 bg-white text-gray-900 rounded-lg hover:text-red-600 hover:border-red-500 transition-all font-mono text-sm border-2 border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isDeletingThis ? 'deleting...' : 'delete()'}
+                      </button>
+                    </div>
+                  </article>
                 );
               })}
             </div>

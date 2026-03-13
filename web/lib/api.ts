@@ -298,6 +298,15 @@ export const resumeApi = {
     }
   },
 
+  deleteResumeById: async (resumeId: string): Promise<ApiResponse<ResumeRecord>> => {
+    try {
+      const response = await apiClient.delete<ApiResponse<ResumeRecord>>(`/api/v1/fetch/deleteResumeById/${resumeId}`);
+      return response.data;
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
   uploadAndParse: async (resumeFile: File): Promise<unknown> => {
     try {
       const formData = new FormData();
