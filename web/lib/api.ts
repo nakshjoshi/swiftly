@@ -312,7 +312,8 @@ export const resumeApi = {
       const formData = new FormData();
       formData.append('resume', resumeFile);
 
-      const response = await apiClient.post('/api/v1/resume/uploadAndParse', formData, {
+      const response = await apiClient.post('/api/v1/resume/uploadAndParse', formData,{
+        withCredentials: true,
         headers: {
           'Content-Type': 'multipart/form-data',
         },
