@@ -120,8 +120,20 @@ export const logout = asyncHandler(async(req:AuthRequest, res:Response)=>{
 
     res
         .status(200)
-        .clearCookie("accessToken")
-        .clearCookie("refreshToken")
+        .clearCookie("accessToken", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        domain: ".swiftly.nakshjoshi.in",
+        path: "/"
+    })
+        .clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        domain: ".swiftly.nakshjoshi.in",
+        path: "/"
+    })
         .json(`cookies cleared ${user}`)
     
 
