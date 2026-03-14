@@ -1,8 +1,16 @@
 import multer from "multer"
+import fs from "fs"
+
+
+const uploadPath = "./src/resume-uploads"
+
 
 const storage = multer.diskStorage({
+
     destination: function(req, file, cb){
-        return cb(null, "./src/resume-uploads")
+
+        fs.mkdirSync(uploadPath, { recursive: true })
+        return cb(null, uploadPath)
     },
     filename: function(req, file, cb){
         const uniqueName = Date.now() + "-"+ file.originalname

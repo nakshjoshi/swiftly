@@ -6,6 +6,7 @@ import type { Request, Response } from "express";
 import path from "path";
 import { AiService } from "../services/ai.service";
 import type { AuthRequest } from "../types/auth.types";
+import fs from "fs";
 
 
 
@@ -51,6 +52,9 @@ export const uploadAndParseResume = asyncHandler( async( req: AuthRequest, res:R
 
 
     const log = await serviceResume.pushLlmJsonOfResumeToRespectiveDbTables(userId, jsonResumeForPrisma)
+    
+
+    await fs.promises.unlink(resumePath)
 
     res.send(log)
 

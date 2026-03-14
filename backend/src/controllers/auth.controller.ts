@@ -40,8 +40,10 @@ export const signUp = asyncHandler(async (req: Request, res: Response)=>{
 
     const options : CookieOptions= {
         httpOnly: true,
-        // secure: true,
-        sameSite: "strict",
+        secure: true,
+        sameSite: "none",
+        domain: ".swiftly.nakshjoshi.in",
+        path: "/"
     }
 
     return res
@@ -112,7 +114,13 @@ export const signIn = asyncHandler(async(req:Request, res: Response)=>{
 export const logout = asyncHandler(async(req:AuthRequest, res:Response)=>{
 
     const userId = req.userId
-
+    const options : CookieOptions= {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        domain: ".swiftly.nakshjoshi.in",
+        path: "/"
+    }
 
     
     const user = await Auth.deleteRefreshToken(userId, req.cookies.refreshToken)
@@ -120,20 +128,8 @@ export const logout = asyncHandler(async(req:AuthRequest, res:Response)=>{
 
     res
         .status(200)
-        .clearCookie("accessToken", {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        domain: ".swiftly.nakshjoshi.in",
-        path: "/"
-    })
-        .clearCookie("refreshToken", {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        domain: ".swiftly.nakshjoshi.in",
-        path: "/"
-    })
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
         .json(`cookies cleared ${user}`)
     
 
