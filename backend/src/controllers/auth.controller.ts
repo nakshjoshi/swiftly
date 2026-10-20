@@ -100,11 +100,11 @@ export const logout = asyncHandler(async (req: AuthRequest, res: Response) => {
     }
 
 
-    res
+    return res
         .status(200)
         .clearCookie("accessToken", authCookieOptions)
         .clearCookie("refreshToken", authCookieOptions)
-        .json(`cookies cleared for user`)
+        .json(new ApiResponse(200, null, "Logged out successfully"))
 
 
 
@@ -151,11 +151,12 @@ export const googleAuth = asyncHandler(async (req: AuthRequest, res: Response) =
 
         await Auth.saveRefreshToken(user!.id, refreshToken)
 
+        // This endpoint signs in returning Google users as well as creating new ones, so it's a 200, not a 201
         return res
-            .status(201)
+            .status(200)
             .cookie("accessToken", accessToken, authCookieOptions)
             .cookie("refreshToken", refreshToken, authCookieOptions)
-            .json(new ApiResponse(201, user, "User registered successfully"))
+            .json(new ApiResponse(200, user, "Signed in with Google"))
 
 
 

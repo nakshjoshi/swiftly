@@ -53,7 +53,7 @@ export const verifyPasskey = asyncHandler(async (req: AuthRequest, res: Response
     const { id: credentialID, publicKey, counter, transports } = credential
     await savePasskeyToDB(credentialID, Buffer.from(publicKey), BigInt(counter), transports as string[], credentialDeviceType, userId)
 
-    res
+    return res
         .status(200)
         .clearCookie("challenge", challengeCookieOptions)
         .json(new ApiResponse(200, null, "Passkey registered successfully"))
@@ -96,7 +96,7 @@ export const verifyPasskeyLogin = asyncHandler(async (req: AuthRequest, res: Res
 
     await authService.saveRefreshToken(passkeyWithUser.userId, refreshToken)
 
-    res
+    return res
         .status(200)
         .clearCookie("login_challenge", challengeCookieOptions)
         .cookie("accessToken", accessToken, authCookieOptions)    // matches req.cookies?.accessToken in auth middleware
