@@ -7,6 +7,8 @@ import path from "path";
 import { AiService } from "../services/ai.service";
 import type { AuthRequest } from "../types/auth.types";
 import fs from "fs";
+import { validate } from "../utils/validate.utils";
+import { resumeInputSchema } from "../validators/resume.validator";
 
 
 
@@ -22,16 +24,8 @@ export const createResume = asyncHandler(async (req: AuthRequest, res: Response)
         throw new ApiError(401, "Unauthorized")
     }
 
-    const body = req.body
-
-    if (!body || typeof body !== 'object') {
-        throw new ApiError(400, "Invalid resume data")
-    }
-
-    // Serialise to JSON string so we can reuse the existing service method
-    const jsonString = JSON.stringify(body)
-
-    const result = await serviceResume.pushLlmJsonOfResumeToRespectiveDbTables(userId, jsonString)
+    const data = validate(resumeInputSchema, req.body)
+    const result = await serviceResume.createResumeForUser(userId, data)
 
     res.status(201).json({
         statusCode: 201,
@@ -78,7 +72,16 @@ export const uploadAndParseResume = asyncHandler( async( req: AuthRequest, res:R
 
 
 
-    const log = await serviceResume.pushLlmJsonOfResumeToRespectiveDbTables(userId, jsonResumeForPrisma)
+    // LLM output is untrusted input too: same schema as the manual form
+    let parsed: unknown
+    try {
+        parsed = JSON.parse(jsonResumeForPrisma)
+    } catch {
+        throw new ApiError(502, "Resume parser returned invalid data, please try again")
+    }
+    const data = validate(resumeInputSchema, parsed, 422, "Could not extract a valid resume from this file")
+
+    const log = await serviceResume.createResumeForUser(userId, data)
     
 
     await fs.promises.unlink(resumePath)

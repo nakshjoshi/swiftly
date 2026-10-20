@@ -2,79 +2,33 @@ import fs from 'node:fs'
 import prisma from "../config/prisma";
 import { PDFParse } from 'pdf-parse'
 import mammoth from 'mammoth'
-import { ApiError } from '../utils/apiError.utils';
+import type { ResumeInput } from '../validators/resume.validator';
 
 
 export class ResumeService{ 
 
 
 
-    public async pushLlmJsonOfResumeToRespectiveDbTables(userId:string, llmJson:string){
-        let jsonDataResume
-        
-        try {
-            jsonDataResume = JSON.parse(llmJson)
-        } catch {
-
-            throw new ApiError(400, "Invalid Json Data")
-            
-        }
+    // `data` must already be validated by resumeInputSchema: only whitelisted fields reach Prisma.
+    public async createResumeForUser(userId:string, data:ResumeInput){
+        const { education, experience, projects, skills, achievements, pors, publications, ...resumeFields } = data
 
         const result = await prisma.resume.create({
             data:{
+                ...resumeFields,
                 userId: userId,
-                title: jsonDataResume.title ||"Resume 1",
-                firstName: jsonDataResume.firstName,
-                middleName: jsonDataResume.middleName,
-                lastName: jsonDataResume.lastName,
-                country:jsonDataResume.country,
-                phoneNumber:jsonDataResume.phoneNumber,
-                resumeEmail:jsonDataResume.resumeEmail,
-                linkedIn: jsonDataResume.linkedIn,
-                github:jsonDataResume.github,
-                personalPortfolio:jsonDataResume.personalPortfolio,
-                leetCode:jsonDataResume.leetCode,
-                codingProfile2:jsonDataResume.codingProfile2,
-                codingProfile3:jsonDataResume.codingProfile3,
-                summary:jsonDataResume.summary,
-                dateOfBirth:jsonDataResume.dateOfBirth ?? undefined,
-                address:jsonDataResume.address ?? undefined,
-                yearOfGraduation:jsonDataResume.yearOfGraduation ?? undefined,
+                title: resumeFields.title || "Resume 1",
 
-                education: jsonDataResume.education?.length
-                  ? { create: jsonDataResume.education }
-                  : undefined,
-
-                experience: jsonDataResume.experience?.length
-                  ? { create: jsonDataResume.experience }
-                  : undefined,
-
-                projects: jsonDataResume.projects?.length
-                  ? { create: jsonDataResume.projects }
-                  : undefined,
-
-                skills: jsonDataResume.skills?.length
-                  ? { create: jsonDataResume.skills }
-                  : undefined,
-
-                achievements: jsonDataResume.achievements?.length
-                  ? { create: jsonDataResume.achievements }
-                  : undefined,
-
-                pors: jsonDataResume.pors?.length
-                  ? { create: jsonDataResume.pors }
-                  : undefined,
-
-                publications: jsonDataResume.publications?.length
-                  ? { create: jsonDataResume.publications }
-                  : undefined
-
-
+                education: education.length ? { create: education } : undefined,
+                experience: experience.length ? { create: experience } : undefined,
+                projects: projects.length ? { create: projects } : undefined,
+                skills: skills.length ? { create: skills } : undefined,
+                achievements: achievements.length ? { create: achievements } : undefined,
+                pors: pors.length ? { create: pors } : undefined,
+                publications: publications.length ? { create: publications } : undefined,
             }
         })
         return result
-
-
     }
 
     public async parsePDF(resumePath:string){
