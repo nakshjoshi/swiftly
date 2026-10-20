@@ -153,14 +153,32 @@ const getAuthCookies = async (): Promise<chrome.cookies.Cookie[]> => {
 	return [...accessTokens, ...refreshTokens];
 };
 
-const fetchJson = async <T>(url: string): Promise<{ status: number; data: T | null }> => {
-	const response = await fetch(url, {
-		method: 'GET',
-		credentials: 'include',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-	});
+// Access tokens are short-lived (15m). On a 401, rotate them once via /auth/refresh and retry.
+// Concurrent 401s share one refresh: refresh rotates the token, so a second parallel call would fail.
+let refreshInFlight: Promise<boolean> | null = null;
+
+const refreshSession = (apiOrigin: string): Promise<boolean> => {
+	refreshInFlight ??= fetch(`${apiOrigin}/api/v1/auth/refresh`, { method: 'POST', credentials: 'include' })
+		.then((response) => response.ok)
+		.catch(() => false)
+		.finally(() => {
+			refreshInFlight = null;
+		});
+	return refreshInFlight;
+};
+
+const requestJson = async <T>(url: string, init: RequestInit): Promise<{ status: number; data: T | null }> => {
+	const send = () =>
+		fetch(url, {
+			...init,
+			credentials: 'include',
+			headers: { 'Content-Type': 'application/json' },
+		});
+
+	let response = await send();
+	if (response.status === 401 && (await refreshSession(new URL(url).origin))) {
+		response = await send();
+	}
 
 	let parsedData: T | null = null;
 	try {
@@ -175,28 +193,10 @@ const fetchJson = async <T>(url: string): Promise<{ status: number; data: T | nu
 	};
 };
 
-const postJson = async <T>(url: string, body: unknown): Promise<{ status: number; data: T | null }> => {
-	const response = await fetch(url, {
-		method: 'POST',
-		credentials: 'include',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify(body),
-	});
+const fetchJson = <T>(url: string) => requestJson<T>(url, { method: 'GET' });
 
-	let parsedData: T | null = null;
-	try {
-		parsedData = (await response.json()) as T;
-	} catch {
-		parsedData = null;
-	}
-
-	return {
-		status: response.status,
-		data: parsedData,
-	};
-};
+const postJson = <T>(url: string, body: unknown) =>
+	requestJson<T>(url, { method: 'POST', body: JSON.stringify(body) });
 
 const normalizeAuthProfile = (input: unknown): AuthProfile | null => {
 	if (!input || typeof input !== 'object') return null;
