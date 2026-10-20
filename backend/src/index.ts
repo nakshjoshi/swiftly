@@ -1,6 +1,5 @@
 import { env } from './config/env'
 import express from 'express'
-import { generateOtp } from './utils/otp.utils'
 import cookieParser from 'cookie-parser'
 import authRouter from './routes/auth.routes'
 import resumeRouter from './routes/resume.routes'
@@ -54,6 +53,5 @@ app.listen(port, ()=>{
     console.log(`App running on http://localhost:${port}`)
 })
 
-// console.log(generateOtp())
 
 // console.log(accessTokenSecret, refreshTokenSecret)

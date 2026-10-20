@@ -2,7 +2,7 @@ import { ProfileUpdate } from "../services/updateData.service";
 import type { AuthRequest } from "../types/auth.types";
 import type { AchievementsTable, EducationTable, ExperienceTable, PorTable, ProjectsTable, PublicationsTable, ResumeTable, SkillsTable } from "../types/db.types";
 import { asyncHandler } from "../utils/asyncHandler.utils";
-import type { Request, Response } from "express";
+import type { Response } from "express";
 
 
 const profile = new ProfileUpdate()

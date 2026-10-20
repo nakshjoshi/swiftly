@@ -1,6 +1,5 @@
 import {Router} from "express"
 import { authMiddleware } from "../middlewares/auth.middleware"
-import { fetchResumeForUser } from "../controllers/profile.controller";
 import { updateAchievementsForResume, updateEducationForResume, updateExperienceForResume, updatePorForResume, updateProjectsForResume, updatePublicationsForResume, updateResumeForUser, updateSkillsForResume } from "../controllers/update.controller";
 
 

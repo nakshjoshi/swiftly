@@ -264,7 +264,7 @@ function formatDate(val: string | null | undefined): string {
   }
 
   // Numeric slash/dash: MM/YYYY, M/YYYY, MM-YYYY, MM/DD/YYYY
-  const slashMatch = trimmed.match(/^(\d{1,2})[\/\-](?:\d{1,2}[\/\-])?(\d{4})$/);
+  const slashMatch = trimmed.match(/^(\d{1,2})[/-](?:\d{1,2}[/-])?(\d{4})$/);
   if (slashMatch) {
     const year = slashMatch[2]!;
     const monthIdx = parseInt(slashMatch[1]!, 10) - 1;
@@ -604,7 +604,6 @@ export async function migrateResumeToPdf(
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tex: rendered }),
-      // @ts-ignore — signal not in all TS lib versions
       signal: AbortSignal.timeout(90_000),
     });
   } catch (err) {

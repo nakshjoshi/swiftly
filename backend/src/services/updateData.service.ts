@@ -1,6 +1,5 @@
 import type { AchievementsTable, EducationTable, ExperienceTable, PorTable, ProjectsTable, PublicationsTable, ResumeTable, SkillsTable } from "../types/db.types";
 import prisma from "../config/prisma";
-import type { Education } from "../../generated/prisma/browser";
 
 
 export class ProfileUpdate{

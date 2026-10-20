@@ -1,4 +1,3 @@
-import { log } from "console";
 import { ExtensionAiService } from "../services/extension.ai.service";
 import type { HTMLObjectAttributes } from "../types/htmlObjectAttributes.types";
 import { asyncHandler } from "../utils/asyncHandler.utils";

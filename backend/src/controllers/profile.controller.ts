@@ -1,7 +1,7 @@
 import { ResumeService } from "../services/resume.service";
 import type { AuthRequest } from "../types/auth.types";
 import { ApiResponse } from "../utils/apiResponse.utils";
-import type { CookieOptions, Request, Response } from "express";
+import type { Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler.utils";
 import { AuthService } from "../services/auth.service";
 

@@ -1,10 +1,10 @@
 import { asyncHandler } from "../utils/asyncHandler.utils";
-import type { AuthRequest, createUserInput, SignIn } from "../types/auth.types";
-import type { CookieOptions, NextFunction, Request, Response } from "express";
+import type { AuthRequest } from "../types/auth.types";
+import type { Response } from "express";
 import { AuthService } from "../services/auth.service";
 import { generateOptions, getUserPasskeys, verifyOptions, savePasskeyToDB, generateLoginOptions, getPasskeyAndUserFromCredentialID, verifyLogin, updateCounter } from "../services/passkey.service";
 import { ApiResponse } from "../utils/apiResponse.utils";
-import type { AuthenticationResponseJSON, RegistrationResponseJSON, VerifiedRegistrationResponse, WebAuthnCredential } from "@simplewebauthn/server";
+import type { AuthenticationResponseJSON, RegistrationResponseJSON, VerifiedRegistrationResponse } from "@simplewebauthn/server";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwt.utils";
 import { authCookieOptions, challengeCookieOptions } from "../config/cookies";
 
@@ -12,7 +12,7 @@ import { authCookieOptions, challengeCookieOptions } from "../config/cookies";
 
 const authService = new AuthService()
 
-export const setupPasskey = asyncHandler(async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const setupPasskey = asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.userId!
     const user = await authService.getUserById(userId)
     const userPasskeys = await getUserPasskeys(userId)
@@ -33,7 +33,7 @@ export const setupPasskey = asyncHandler(async (req: AuthRequest, res: Response,
 
 })
 
-export const verifyPasskey = asyncHandler(async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const verifyPasskey = asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.userId!
     const credentialPayload = req.body as RegistrationResponseJSON
     const expectedChallenge = req.signedCookies["challenge"]
@@ -49,7 +49,7 @@ export const verifyPasskey = asyncHandler(async (req: AuthRequest, res: Response
         return res.status(400).json(new ApiResponse(400, null, "Passkey verification failed"))
     }
 
-    const { credential, credentialDeviceType, credentialBackedUp } = registrationInfo
+    const { credential, credentialDeviceType } = registrationInfo
     const { id: credentialID, publicKey, counter, transports } = credential
     await savePasskeyToDB(credentialID, Buffer.from(publicKey), BigInt(counter), transports as string[], credentialDeviceType, userId)
 
@@ -61,7 +61,7 @@ export const verifyPasskey = asyncHandler(async (req: AuthRequest, res: Response
 
 })
 
-export const getPasskeyLoginOptions = asyncHandler(async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const getPasskeyLoginOptions = asyncHandler(async (req: AuthRequest, res: Response) => {
     const loginOptions = await generateLoginOptions()
     return res
         .status(200)
@@ -70,7 +70,7 @@ export const getPasskeyLoginOptions = asyncHandler(async (req: AuthRequest, res:
 })
 
 
-export const verifyPasskeyLogin = asyncHandler(async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const verifyPasskeyLogin = asyncHandler(async (req: AuthRequest, res: Response) => {
 
     const credentialPayload = req.body as AuthenticationResponseJSON
     const expectedChallenge = req.signedCookies["login_challenge"]

@@ -15,7 +15,7 @@ export class AuthService{
             })
     
             return user;
-        } catch (error) {
+        } catch {
             
             throw new ApiError(404,"connection to DB failed")
             
@@ -29,7 +29,7 @@ export class AuthService{
             return await prisma.session.findFirst({
                 where:{userId:userId, refreshToken:hashToken(token)}
             })
-        } catch (error) {
+        } catch {
             
             throw new ApiError(404,"connection to DB failed")
             
@@ -50,7 +50,7 @@ export class AuthService{
         if(data.provider=="credentials"){            
 
             if(data.hashedPassword){
-                let newHashedPassword = await hashPassword(data.hashedPassword)
+                const newHashedPassword = await hashPassword(data.hashedPassword)
                 data.hashedPassword = newHashedPassword
             }
 
@@ -168,7 +168,7 @@ export class AuthService{
                 if(authAccountCrendential && !authAccountGoogle){
 
                     //add a row with google auth for existing user
-                    const newGoogleAuthForExistingUser = await tx.authAccount.create({
+                    await tx.authAccount.create({
                         data:{
                             userId: existingUser.id,
                             provider:"google",
@@ -178,7 +178,7 @@ export class AuthService{
 
 
                     //update avatarurl with google avatar
-                    const updateAvatar = await tx.user.update({
+                    await tx.user.update({
                         where:{id:existingUser.id},
                         data:{avatarUrl:data.avatar}
                     })

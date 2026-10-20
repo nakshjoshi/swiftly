@@ -3,7 +3,6 @@ import type { AuthenticationResponseJSON, AuthenticatorTransportFuture, PublicKe
 import prisma from "../config/prisma";
 import type { Bytes } from "@prisma/client/runtime/client";
 import type { Passkey } from "../../generated/prisma/browser";
-import { log } from "node:console";
 import "dotenv/config";
 
 // methods for passkey registration\

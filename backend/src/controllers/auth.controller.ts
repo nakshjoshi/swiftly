@@ -8,7 +8,6 @@ import { ApiResponse } from "../utils/apiResponse.utils";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../utils/jwt.utils";
 import { verifyPassword } from "../utils/bcrypt.utils";
 import { googleClientId, googleOAuth2Client } from "../utils/googleOauth2";
-import { log } from "node:console";
 
 
 const Auth = new AuthService()

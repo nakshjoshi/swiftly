@@ -14,7 +14,7 @@ export class ResumeService{
         
         try {
             jsonDataResume = JSON.parse(llmJson)
-        } catch (error) {
+        } catch {
 
             throw new ApiError(400, "Invalid Json Data")
             

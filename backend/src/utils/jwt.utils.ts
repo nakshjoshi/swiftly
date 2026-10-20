@@ -43,7 +43,7 @@ const verifyAccessToken = (token: string): User | null => {
             return decoded as User;
         }
         return null;
-    } catch (error) {
+    } catch {
         return null;
     }
 }
@@ -57,7 +57,7 @@ const verifyRefreshToken = (token:string)=>{
             return decoded as User
         }
         return null
-    } catch (error) {
+    } catch {
         return null
     }
 }

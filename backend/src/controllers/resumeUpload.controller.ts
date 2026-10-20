@@ -2,7 +2,7 @@ import { fileTypeFromFile } from "file-type";
 import { ResumeService } from "../services/resume.service";
 import { ApiError } from "../utils/apiError.utils";
 import { asyncHandler } from "../utils/asyncHandler.utils";
-import type { Request, Response } from "express";
+import type { Response } from "express";
 import path from "path";
 import { AiService } from "../services/ai.service";
 import type { AuthRequest } from "../types/auth.types";
