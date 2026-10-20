@@ -54,6 +54,32 @@ const duration = (name: string, fallback: string, maxSeconds?: number): string =
     return value
 }
 
+// Comma-separated list of browser origins allowed to call the API with cookies.
+const origins = (name: string, fallback: string): string[] => {
+    const list = (process.env[name]?.trim() || fallback).split(",").map((o) => o.trim()).filter(Boolean)
+    for (const origin of list) {
+        try {
+            const url = new URL(origin)
+            // An origin is scheme://host[:port] only; a trailing slash or path never matches the Origin header
+            if (url.origin !== origin) errors.push(`${name}: "${origin}" should be "${url.origin}"`)
+        } catch {
+            errors.push(`${name}: "${origin}" is not a valid URL`)
+        }
+    }
+    return list
+}
+
+const positiveInt = (name: string, fallback: number): number => {
+    const raw = process.env[name]?.trim()
+    if (!raw) return fallback
+    const value = Number(raw)
+    if (!Number.isInteger(value) || value <= 0) {
+        errors.push(`${name} must be a positive integer (got "${raw}")`)
+        return fallback
+    }
+    return value
+}
+
 export const env = {
     IS_DEV,
     // Shared parent domain for auth cookies, e.g. ".swiftly.nakshjoshi.in". Must not be set locally:
@@ -67,6 +93,11 @@ export const env = {
     // Keep them short; the refresh token (checked against the Session table) does the long-lived work.
     ACCESS_TOKEN_EXPIRY: duration("ACCESS_TOKEN_EXPIRY", "15m", 60 * 60),
     REFRESH_TOKEN_EXPIRY: duration("REFRESH_TOKEN_EXPIRY", "7d"),
+    // Locally only the Next dev server; in production only the real frontend (localhost is no longer allowed there)
+    CORS_ORIGINS: origins("CORS_ORIGINS", IS_DEV ? "http://localhost:3000" : "https://swiftly.nakshjoshi.in"),
+    // Max open Postgres connections per backend instance. Keep it below your database's connection limit
+    // divided by the number of instances.
+    DB_POOL_MAX: positiveInt("DB_POOL_MAX", 10),
 }
 
 // If both JWT secrets were equal, an access token would also pass as a refresh token (and vice versa).

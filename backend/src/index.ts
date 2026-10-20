@@ -29,8 +29,9 @@ if (!env.IS_DEV) app.set('trust proxy', 1)
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'same-site' } }))
 
 app.use(cors({
-    origin:["https://swiftly.nakshjoshi.in","http://localhost:3000"],
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: env.CORS_ORIGINS,
+    // OPTIONS needn't be listed: cors answers preflight requests itself
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true
 }))
 
