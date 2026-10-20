@@ -12,6 +12,7 @@ import extensionRouter from './routes/extension.route'
 import migrateRouter from './routes/migrate.routes'
 import passkeyRouter from './routes/passkey.routes'
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware'
+import prisma from './config/prisma'
 
 
 const port = process.env.PORT || 3001
@@ -50,8 +51,19 @@ app.use('/api/v1/fetch', fetchRouter)
 app.use('/api/v1/extension', extensionRouter)
 app.use('/api/v1/migrate', migrateRouter)
 
-app.get('/health', (req,res)=>{
-    res.send('Health Check Ok!')
+// Used by the Docker HEALTHCHECK (and any uptime monitor). It checks the database too: an API that can't reach
+// Postgres can't serve a single real request, so it must not report healthy.
+app.get('/health', async (req, res) => {
+    try {
+        await Promise.race([
+            prisma.$queryRaw`SELECT 1`,
+            new Promise((_, reject) => setTimeout(() => reject(new Error('database ping timed out')), 3000)),
+        ])
+        res.json({ status: 'ok', database: 'ok' })
+    } catch (error) {
+        console.error('[health] database check failed:', (error as Error).message)
+        res.status(503).json({ status: 'error', database: 'unreachable' })
+    }
 })
 
 // Must be registered after all routes: 404 for unmatched paths, then the central error handler.
