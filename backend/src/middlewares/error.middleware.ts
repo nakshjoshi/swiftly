@@ -33,7 +33,7 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
             statusCode = status
             message = err.type === 'entity.parse.failed' ? "Invalid JSON body" : (err.message || message)
         } else if (err?.name === 'MulterError') {
-            statusCode = 400
+            statusCode = err.code === 'LIMIT_FILE_SIZE' ? 413 : 400
             message = err.message
         } else if (err?.code === 'P2025') {
             // Prisma: record to update/delete not found (or not owned by the caller — deliberately indistinguishable).

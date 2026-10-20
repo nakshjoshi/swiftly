@@ -1,4 +1,3 @@
-import fs from 'node:fs'
 import prisma from "../config/prisma";
 import { PDFParse } from 'pdf-parse'
 import mammoth from 'mammoth'
@@ -31,9 +30,8 @@ export class ResumeService{
         return result
     }
 
-    public async parsePDF(resumePath:string){
-        const bufferFile = await fs.promises.readFile(resumePath)
-        const parser = new PDFParse({data: bufferFile})
+    public async parsePDF(file:Buffer){
+        const parser = new PDFParse({data: file})
         const resumeText = (await parser.getText()).text
         const resumeLinks = (await parser.getInfo({ parsePageInfo: true })).pages[0]?.links
         await parser.destroy()
@@ -50,10 +48,9 @@ export class ResumeService{
 
     }
 
-    public async parseDocx(resumePath:string){
+    public async parseDocx(file:Buffer){
 
-        // const bufferFile = await fs.promises.readFile(resumePath);
-        const resumeText = await mammoth.convertToHtml({path: resumePath})
+        const resumeText = await mammoth.convertToHtml({buffer: file})
 
 
 
@@ -76,14 +73,8 @@ export class ResumeService{
             .replace(/\\emph\{(.*?)\}/g, "$1")
 }
 
-    public async parseTex(resumePath:string){
-
-
-        
-
-
-        const text = await fs.promises.readFile(resumePath, "utf-8")
-        return this.cleanLatex(text)
+    public async parseTex(file:Buffer){
+        return this.cleanLatex(file.toString("utf-8"))
     }
 
 

@@ -1,4 +1,4 @@
-import { fileTypeFromFile } from "file-type";
+import { fileTypeFromBuffer } from "file-type";
 import { ResumeService } from "../services/resume.service";
 import { ApiError } from "../utils/apiError.utils";
 import { asyncHandler } from "../utils/asyncHandler.utils";
@@ -6,7 +6,6 @@ import type { Response } from "express";
 import path from "path";
 import { AiService } from "../services/ai.service";
 import type { AuthRequest } from "../types/auth.types";
-import fs from "fs";
 import { validate } from "../utils/validate.utils";
 import { resumeInputSchema } from "../validators/resume.validator";
 
@@ -44,28 +43,24 @@ export const uploadAndParseResume = asyncHandler( async( req: AuthRequest, res:R
         throw new ApiError(400, "Upload Resume File Failed")
     }
 
-    const resumePath = resume.path
-    const type = await fileTypeFromFile(resumePath);
-    const resumeFileType =  type?.ext
+    // Trust the bytes, not the filename: a renamed .exe must not be handed to the PDF parser.
+    // .tex is plain text with no magic bytes, so it's the one type that is detected as "nothing".
+    const detected = (await fileTypeFromBuffer(resume.buffer))?.ext
     const ext = path.extname(resume.originalname).toLowerCase()
-
 
     let resumeText
 
-    if(resumeFileType === "pdf" || ext === ".pdf"){
-        resumeText = await serviceResume.parsePDF(resumePath)
-
-
+    if(ext === ".pdf" && detected === "pdf"){
+        resumeText = await serviceResume.parsePDF(resume.buffer)
     }
-    else if(resumeFileType === 'docx' || ext === ".docx"){
-        resumeText = await serviceResume.parseDocx(resumePath)        
-
+    else if(ext === ".docx" && detected === "docx"){
+        resumeText = await serviceResume.parseDocx(resume.buffer)
     }
-    else if(ext === ".tex" || resumeFileType === "tex"){
-        resumeText = await serviceResume.parseTex(resumePath)
+    else if(ext === ".tex" && detected === undefined){
+        resumeText = await serviceResume.parseTex(resume.buffer)
     }
     else{
-        throw new ApiError(400, "Unsupported File Format")
+        throw new ApiError(400, "File content does not match its extension, upload a PDF, DOCX or TEX file")
     }
 
     const jsonResumeForPrisma = await AI.googleGemini(resumeText);
@@ -82,9 +77,6 @@ export const uploadAndParseResume = asyncHandler( async( req: AuthRequest, res:R
     const data = validate(resumeInputSchema, parsed, 422, "Could not extract a valid resume from this file")
 
     const log = await serviceResume.createResumeForUser(userId, data)
-    
-
-    await fs.promises.unlink(resumePath)
 
     res.send(log)
 
