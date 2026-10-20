@@ -4,11 +4,11 @@ import type { User } from '../types/user.types';
 import { env } from '../config/env';
 
 const accessTokenSecret = env.ACCESS_TOKEN_SECRET
-const accessTokenExpiry = process.env.ACCESS_TOKEN_EXPIRY || '7d' 
+const accessTokenExpiry = env.ACCESS_TOKEN_EXPIRY
 
 
 const refreshTokenSecret = env.REFRESH_TOKEN_SECRET
-const refreshTokenExpiry = process.env.REFRESH_TOKEN_EXPIRY || '15d'
+const refreshTokenExpiry = env.REFRESH_TOKEN_EXPIRY
 
 const generateAccessToken = (userId:string)=>{
     return jwt.sign({

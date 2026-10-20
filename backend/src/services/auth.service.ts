@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken";
 import prisma from "../config/prisma";
 import type { createUserInput } from "../types/auth.types";
 import { ApiError } from "../utils/apiError.utils";
@@ -229,7 +230,9 @@ export class AuthService{
     public async saveRefreshToken(userId:string, token:string){
 
         const hashedToken = hashToken(token)
-        const expiresAt = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)
+        // Session lifetime follows the token's own exp claim, so it always matches REFRESH_TOKEN_EXPIRY
+        const { exp } = jwt.decode(token) as { exp: number }
+        const expiresAt = new Date(exp * 1000)
 
         return await prisma.session.create({
             data:{

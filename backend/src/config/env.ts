@@ -36,6 +36,24 @@ const requiredSecret = (name: string): string => {
 // Unset or anything else is treated as production, so a misconfigured deploy fails safe.
 const IS_DEV = process.env.NODE_ENV?.trim() === "development"
 
+// Token lifetimes in jsonwebtoken's string form ("15m", "1h", "7d"). A unit is required: a bare
+// number string means *milliseconds* to jsonwebtoken, which is an easy way to mint dead tokens.
+const DURATION_UNITS: Record<string, number> = { s: 1, m: 60, h: 3600, d: 86400 }
+
+const duration = (name: string, fallback: string, maxSeconds?: number): string => {
+    const value = process.env[name]?.trim() || fallback
+    const match = value.match(/^(\d+)(s|m|h|d)$/)
+    if (!match) {
+        errors.push(`${name} must look like 15m, 1h or 7d (got "${value}")`)
+        return fallback
+    }
+    const seconds = Number(match[1]) * DURATION_UNITS[match[2]!]!
+    if (maxSeconds && seconds > maxSeconds) {
+        errors.push(`${name} must be at most ${maxSeconds / 60}m (got "${value}")`)
+    }
+    return value
+}
+
 export const env = {
     IS_DEV,
     // Shared parent domain for auth cookies, e.g. ".swiftly.nakshjoshi.in". Must not be set locally:
@@ -45,6 +63,10 @@ export const env = {
     ACCESS_TOKEN_SECRET: requiredSecret("ACCESS_TOKEN_SECRET"),
     REFRESH_TOKEN_SECRET: requiredSecret("REFRESH_TOKEN_SECRET"),
     COOKIE_SECRET: requiredSecret("COOKIE_SECRET"),
+    // Access tokens are stateless and can't be revoked, so logout only takes effect once they expire.
+    // Keep them short; the refresh token (checked against the Session table) does the long-lived work.
+    ACCESS_TOKEN_EXPIRY: duration("ACCESS_TOKEN_EXPIRY", "15m", 60 * 60),
+    REFRESH_TOKEN_EXPIRY: duration("REFRESH_TOKEN_EXPIRY", "7d"),
 }
 
 // If both JWT secrets were equal, an access token would also pass as a refresh token (and vice versa).
