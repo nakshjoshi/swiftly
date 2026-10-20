@@ -1,4 +1,5 @@
 import { ProfileUpdate } from "../services/updateData.service";
+import { requireUserId } from "../middlewares/auth.middleware";
 import type { AuthRequest } from "../types/auth.types";
 import type { AchievementsTable, EducationTable, ExperienceTable, PorTable, ProjectsTable, PublicationsTable, ResumeTable, SkillsTable } from "../types/db.types";
 import { asyncHandler } from "../utils/asyncHandler.utils";
@@ -10,7 +11,7 @@ const profile = new ProfileUpdate()
 
 export const updateResumeForUser = asyncHandler(async (req:AuthRequest, res:Response)=>{
 
-    const userId = req.userId!
+    const userId = requireUserId(req)
     const {title, firstName, middleName, lastName, country, phoneNumber, resumeEmail, linkedIn, github, personalPortfolio, leetCode, codingProfile2, codingProfile3, summary, dateOfBirth, yearOfGraduation, address }:ResumeTable = req.body
 
     const resumeId = req.body.id!
@@ -25,7 +26,7 @@ export const updateResumeForUser = asyncHandler(async (req:AuthRequest, res:Resp
 
 export const updateEducationForResume = asyncHandler(async(req:AuthRequest, res:Response)=>{
 
-    const userId = req.userId!
+    const userId = requireUserId(req)
     const {instituteName, level, startDate, endDate, location, degree, branch, grade}:EducationTable = req.body
     const resumeId = req.body.resumeId!
     const educationId = req.body.educationId!
@@ -42,7 +43,7 @@ export const updateEducationForResume = asyncHandler(async(req:AuthRequest, res:
 
 export const updateExperienceForResume = asyncHandler(async(req:AuthRequest, res:Response)=>{
 
-    const userId = req.userId!
+    const userId = requireUserId(req)
     const {companyName, position, startDate, endDate, location, description}:ExperienceTable = req.body
     const resumeId = req.body.resumeId!
     const experienceId = req.body.experienceId!
@@ -58,7 +59,7 @@ export const updateExperienceForResume = asyncHandler(async(req:AuthRequest, res
 
 export const updateProjectsForResume = asyncHandler(async(req:AuthRequest, res:Response)=>{
 
-    const userId = req.userId!
+    const userId = requireUserId(req)
     const {projectName, techStack, description, githubLink, liveLink, startDate, endDate}:ProjectsTable = req.body
     const resumeId = req.body.resumeId!
     const projectId = req.body.projectId!
@@ -73,7 +74,7 @@ export const updateProjectsForResume = asyncHandler(async(req:AuthRequest, res:R
 
 export const updateSkillsForResume = asyncHandler(async(req:AuthRequest, res:Response)=>{
 
-    const userId = req.userId!
+    const userId = requireUserId(req)
     const {name, category}:SkillsTable = req.body
     const resumeId = req.body.resumeId!
     const skillId = req.body.skillId!
@@ -89,7 +90,7 @@ export const updateSkillsForResume = asyncHandler(async(req:AuthRequest, res:Res
 
 export const updateAchievementsForResume = asyncHandler(async(req:AuthRequest, res:Response)=>{
 
-    const userId = req.userId!
+    const userId = requireUserId(req)
     const {title, org, date, description}:AchievementsTable = req.body
     const resumeId = req.body.resumeId!
     const achievementId = req.body.achievementId!
@@ -105,7 +106,7 @@ export const updateAchievementsForResume = asyncHandler(async(req:AuthRequest, r
 
 export const updatePorForResume = asyncHandler(async(req:AuthRequest, res:Response)=>{
 
-    const userId = req.userId!
+    const userId = requireUserId(req)
     const {title, org, startDate, endDate, description}:PorTable = req.body
     const resumeId = req.body.resumeId!
     const porId = req.body.porId!
@@ -121,7 +122,7 @@ export const updatePorForResume = asyncHandler(async(req:AuthRequest, res:Respon
 
 export const updatePublicationsForResume = asyncHandler(async(req:AuthRequest, res:Response)=>{
 
-    const userId = req.userId!
+    const userId = requireUserId(req)
     const {authors, title, conference, place, publicationDate, description}:PublicationsTable = req.body
     const resumeId = req.body.resumeId!
     const publicationId = req.body.publicationId!

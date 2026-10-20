@@ -1,4 +1,5 @@
 import { ResumeService } from "../services/resume.service";
+import { requireUserId } from "../middlewares/auth.middleware";
 import type { AuthRequest } from "../types/auth.types";
 import { ApiResponse } from "../utils/apiResponse.utils";
 import type { Response } from "express";
@@ -11,7 +12,7 @@ const authService = new AuthService()
 
 
 export const getUserProfile = asyncHandler(async(req:AuthRequest, res: Response)=>{
-    const userId = req.userId!
+    const userId = requireUserId(req)
     const profile = await authService.getUserById(userId)
     return profile
         ? res.status(200).json(new ApiResponse(200, profile, "User profile fetched successfully"))
@@ -21,7 +22,7 @@ export const getUserProfile = asyncHandler(async(req:AuthRequest, res: Response)
 
 export const fetchResumeForUser = asyncHandler(async(req:AuthRequest, res: Response)=>{
     
-    const userId = req.userId!
+    const userId = requireUserId(req)
     const result = await resumeService.fetchResumeForUser(userId)
 
     // console.log(userId, result)
@@ -35,7 +36,7 @@ export const fetchResumeForUser = asyncHandler(async(req:AuthRequest, res: Respo
 
 
 export const fetchFullDetailsOfOneResume = asyncHandler(async(req:AuthRequest, res: Response)=>{
-    const userId = req.userId!
+    const userId = requireUserId(req)
     const resumeId = req.params.resumeId
 
     const result = await resumeService.fetchOneFullResumeForUser(userId, resumeId as string)
@@ -49,7 +50,7 @@ export const fetchFullDetailsOfOneResume = asyncHandler(async(req:AuthRequest, r
 
 
 export const deleteResumeForUser = asyncHandler(async(req:AuthRequest, res:Response)=>{
-    const userId = req.userId!
+    const userId = requireUserId(req)
     const resumeId = req.params.resumeId
 
     const result = await resumeService.deleteResumeForUser(userId, resumeId as string)

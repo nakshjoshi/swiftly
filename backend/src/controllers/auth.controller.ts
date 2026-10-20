@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { requireUserId } from "../middlewares/auth.middleware";
 import { authCookieOptions } from "../config/cookies";
 import { asyncHandler } from "../utils/asyncHandler.utils";
 import type { AuthRequest, CreateUserInput } from "../types/auth.types";
@@ -101,7 +102,7 @@ export const signIn = asyncHandler(async (req: Request, res: Response) => {
 
 export const logout = asyncHandler(async (req: AuthRequest, res: Response) => {
 
-    const userId = req.userId
+    const userId = requireUserId(req)
 
     if (req.cookies.refreshToken) {
         await Auth.deleteRefreshToken(userId, req.cookies.refreshToken)

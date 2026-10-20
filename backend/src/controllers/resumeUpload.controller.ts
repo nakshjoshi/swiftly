@@ -1,4 +1,5 @@
 import { fileTypeFromBuffer } from "file-type";
+import { requireUserId } from "../middlewares/auth.middleware";
 import { ResumeService } from "../services/resume.service";
 import { ApiError } from "../utils/apiError.utils";
 import { asyncHandler } from "../utils/asyncHandler.utils";
@@ -17,11 +18,7 @@ const AI = new AiService()
 
 // ─── Create Resume (from form — no file upload, no AI) ────────────────────────
 export const createResume = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const userId = req.userId
-
-    if (!userId) {
-        throw new ApiError(401, "Unauthorized")
-    }
+    const userId = requireUserId(req)
 
     const data = validate(resumeInputSchema, req.body)
     const result = await serviceResume.createResumeForUser(userId, data)
@@ -37,11 +34,7 @@ export const createResume = asyncHandler(async (req: AuthRequest, res: Response)
 export const uploadAndParseResume = asyncHandler( async( req: AuthRequest, res:Response)=>{
 
     const resume = req.file
-    const userId = req.userId
-
-    if (!userId) {
-        throw new ApiError(401, "Unauthorized")
-    }
+    const userId = requireUserId(req)
 
     if(!resume){
         throw new ApiError(400, "Upload Resume File Failed")

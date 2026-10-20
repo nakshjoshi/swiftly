@@ -23,6 +23,6 @@ export type GoogleUserInput = NewUserBase & {
 
 export type CreateUserInput = CredentialUserInput | GoogleUserInput
 
-export interface AuthRequest extends Request {
-  userId?: any;
-}
+// userId is declared on Express.Request itself (types/express.d.ts); this alias is kept so existing
+// handler signatures keep reading as "this route is authenticated".
+export type AuthRequest = Request

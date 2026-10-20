@@ -1,4 +1,5 @@
 import { ExtensionAiService } from "../services/extension.ai.service";
+import { requireUserId } from "../middlewares/auth.middleware";
 import { ResumeService } from "../services/resume.service";
 import type { AuthRequest } from "../types/auth.types";
 import type { HTMLObjectAttributes } from "../types/htmlObjectAttributes.types";
@@ -15,7 +16,7 @@ export const getObjectForAutofill = asyncHandler(async (req: AuthRequest, res) =
 
     // Only the caller's own resume ever reaches the LLM. Taking resume data from the request body would make
     // this endpoint a general-purpose proxy to our Gemini key.
-    const [resume] = await resumeService.fetchOneFullResumeForUser(req.userId, resumeId)
+    const [resume] = await resumeService.fetchOneFullResumeForUser(requireUserId(req), resumeId)
     if (!resume) {
         throw new ApiError(404, "Resume not found")
     }

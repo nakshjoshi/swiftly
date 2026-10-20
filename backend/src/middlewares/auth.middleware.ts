@@ -1,4 +1,4 @@
-import type { Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { ApiError } from '../utils/apiError.utils';
 import { verifyAccessToken } from '../utils/jwt.utils';
 import type { AuthRequest } from '../types/auth.types';
@@ -23,4 +23,13 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
 
     req.userId = decoded.userId
     next()
+}
+
+// For handlers on routes behind authMiddleware: returns the signed-in user's id, typed as string.
+// Throws 401 instead of letting `undefined` reach a query if a route is ever wired without the middleware.
+export const requireUserId = (req: Request): string => {
+    if (!req.userId) {
+        throw new ApiError(401, "Unauthorized request")
+    }
+    return req.userId
 }

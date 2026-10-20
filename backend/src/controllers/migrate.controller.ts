@@ -1,4 +1,5 @@
 import type { Response } from 'express';
+import { requireUserId } from '../middlewares/auth.middleware';
 import { asyncHandler } from '../utils/asyncHandler.utils';
 import { ApiError } from '../utils/apiError.utils';
 import { ApiResponse } from '../utils/apiResponse.utils';
@@ -54,7 +55,7 @@ export const getTemplateSchema = asyncHandler(async (req: AuthRequest, res: Resp
  * sends to latex-service, streams the PDF back to the browser.
  */
 export const compileMigratedResume = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const userId = req.userId!;
+  const userId = requireUserId(req);
   const { resumeId, templateId, migrationConfig } = req.body as {
     resumeId?: string;
     templateId?: string;
@@ -86,7 +87,7 @@ export const compileMigratedResume = asyncHandler(async (req: AuthRequest, res: 
  * Used for direct .tex download from the frontend.
  */
 export const getLatexSource = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const userId = req.userId!;
+  const userId = requireUserId(req);
   const { resumeId, templateId, migrationConfig } = req.body as {
     resumeId?: string;
     templateId?: string;

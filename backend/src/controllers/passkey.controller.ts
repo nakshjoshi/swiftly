@@ -1,4 +1,5 @@
 import { asyncHandler } from "../utils/asyncHandler.utils";
+import { requireUserId } from "../middlewares/auth.middleware";
 import type { AuthRequest } from "../types/auth.types";
 import type { Response } from "express";
 import { AuthService } from "../services/auth.service";
@@ -13,7 +14,7 @@ import { authCookieOptions, challengeCookieOptions } from "../config/cookies";
 const authService = new AuthService()
 
 export const setupPasskey = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const userId = req.userId!
+    const userId = requireUserId(req)
     const user = await authService.getUserById(userId)
     const userPasskeys = await getUserPasskeys(userId)
     if (user) {
@@ -34,7 +35,7 @@ export const setupPasskey = asyncHandler(async (req: AuthRequest, res: Response)
 })
 
 export const verifyPasskey = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const userId = req.userId!
+    const userId = requireUserId(req)
     const credentialPayload = req.body as RegistrationResponseJSON
     const expectedChallenge = req.signedCookies["challenge"]
 
