@@ -9,6 +9,7 @@ import fetchRouter from './routes/fetch.routes'
 import extensionRouter from './routes/extension.route'
 import migrateRouter from './routes/migrate.routes'
 import passkeyRouter from './routes/passkey.routes'
+import { errorHandler, notFoundHandler } from './middlewares/error.middleware'
 
 
 const port = process.env.PORT || 3001
@@ -38,6 +39,10 @@ app.use('/api/v1/migrate', migrateRouter)
 app.get('/health', (req,res)=>{
     res.send('Health Check Ok!')
 })
+
+// Must be registered after all routes: 404 for unmatched paths, then the central error handler.
+app.use(notFoundHandler)
+app.use(errorHandler)
 
 app.listen(port, ()=>{
     console.log(`App running on http://localhost:${port}`)
