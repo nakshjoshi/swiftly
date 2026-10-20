@@ -1,39 +1,27 @@
 import type { Request } from "express";
 
-export type BaseUser = {
-    fullName:string
-    email:string
-    phone:string
-    avatar:string
+type NewUserBase = {
+    email: string
+    fullName?: string | null
+    phone?: string | null
+    avatar?: string | null
 }
 
-export type CredentialUser = BaseUser & {
+// `password` is the user's plaintext password as typed; createUser hashes it before storing.
+export type CredentialUserInput = NewUserBase & {
     provider: "credentials"
-    hashedPassword: string
-    providerId:never
+    password: string
+    providerId?: undefined
 }
 
-export type OAuthUser = BaseUser & {
-    provider: string
-    providerId:string
-    hashedPassword: never
+// Only built from a verified Google ID token (googleAuth), never from request bodies.
+export type GoogleUserInput = NewUserBase & {
+    provider: "google"
+    providerId: string
+    password?: undefined
 }
 
-
-
-export type createUserInput = CredentialUser | OAuthUser
-
-
-
-export type SignIn ={
-
-    email:string
-    hashedPassword:string
-    provider?:string
-
-}
-
-
+export type CreateUserInput = CredentialUserInput | GoogleUserInput
 
 export interface AuthRequest extends Request {
   userId?: any;

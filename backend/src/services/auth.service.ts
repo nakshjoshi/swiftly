@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import prisma from "../config/prisma";
 import type { Prisma } from "../../generated/prisma/client";
-import type { createUserInput } from "../types/auth.types";
+import type { CreateUserInput } from "../types/auth.types";
 import { ApiError } from "../utils/apiError.utils";
 import { hashPassword } from "../utils/bcrypt.utils";
 import { hashToken } from "../utils/tokenHash.utils";
@@ -30,66 +30,28 @@ export class AuthService{
     }
 
 
-    public async createUser(data:createUserInput){
+    // Google accounts must only come from the verified Google callback (provider "google" here means Google
+    // has already confirmed the email); signup only ever creates "credentials" accounts.
+    public async createUser(data:CreateUserInput){
 
 
 
-        if(data.provider=="credentials"){            
+        if(data.provider=="credentials"){
 
-            if(data.hashedPassword){
-                const newHashedPassword = await hashPassword(data.hashedPassword)
-                data.hashedPassword = newHashedPassword
-            }
+            // Hash before opening the transaction: bcrypt is slow and shouldn't hold a DB connection
+            const passwordHash = await hashPassword(data.password)
 
             return await prisma.$transaction(async(tx)=>{
 
+            // An email that already has an account is always a 409, whatever that account signs in with.
+            // Never attach a password to an existing (e.g. Google-only) account here: signup proves nothing
+            // about who owns the email, so that would let anyone take over the account by "signing up" with it.
             const existingUser = await tx.user.findUnique({
                 where:{email:data.email}
             })
-
-            
-
             if(existingUser){
-                
-                const authAccountCrendential = await tx.authAccount.findUnique({
-                    where:{
-                        userId_provider:{
-                            userId: existingUser.id,
-                            provider: "credentials"
-                        }
-                    }
-                })
-
-                if(authAccountCrendential){
-                    throw new ApiError(409, "User already exists with same email id")
-                }
-                
-                const authAccountGoogle = await tx.authAccount.findUnique({
-                    where:{
-                        userId_provider:{
-                            userId: existingUser.id,
-                            provider: "google"
-                        }
-                    }
-                })
-
-                if(authAccountGoogle){
-                    await tx.authAccount.create({
-                        data:{
-                            userId: existingUser.id,
-                            provider:"credentials",
-                            passwordHash: data.hashedPassword
-                        }
-                    })
-
-                    return existingUser
-                }
-
                 throw new ApiError(409, "User already exists with same email id")
             }
-
-            
-            //create user
 
             const Newuser = await tx.user.create({
                 data:{
@@ -101,13 +63,12 @@ export class AuthService{
                 }
             })
 
-
             // create auth account with credentials
             await tx.authAccount.create({
                     data:{
                         userId: Newuser.id,
                         provider:"credentials",
-                        passwordHash: data.hashedPassword
+                        passwordHash: passwordHash
                     }
                 })
 

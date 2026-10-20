@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { authCookieOptions } from "../config/cookies";
 import { asyncHandler } from "../utils/asyncHandler.utils";
-import type { AuthRequest, createUserInput, SignIn } from "../types/auth.types";
+import type { AuthRequest, CreateUserInput } from "../types/auth.types";
 import { ApiError } from "../utils/apiError.utils";
 import { AuthService } from "../services/auth.service";
 import { ApiResponse } from "../utils/apiResponse.utils";
@@ -19,24 +19,34 @@ const REFRESH_REUSE_GRACE_MS = 30 * 1000
 
 const DUMMY_PASSWORD_HASH = "$2b$10$qeRLVs/q1yN41TCcWEcxsuYm2kr41fiHKdnBWqmgRrpcVSoV/Dyfi"
 
+// The plaintext password from a signup/signin body. Clients used to send it as `hashedPassword` (it was never
+// hashed); that name is still accepted so an older web build keeps working until it's redeployed.
+const readPassword = (body: unknown): string => {
+    const { password, hashedPassword } = (body ?? {}) as { password?: unknown, hashedPassword?: unknown }
+    const value = password ?? hashedPassword
+    return typeof value === "string" && value.trim() ? value : ""
+}
+
 export const signUp = asyncHandler(async (req: Request, res: Response) => {
 
-    const { email, fullName, phone, provider, providerId, hashedPassword }: createUserInput = req.body
+    const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : ""
+    const fullName = typeof req.body?.fullName === "string" ? req.body.fullName.trim() : ""
+    const phone = typeof req.body?.phone === "string" ? req.body.phone.trim() : undefined
+    const password = readPassword(req.body)
 
-    if (!email?.trim() || !fullName?.trim() || (!hashedPassword?.trim() && !providerId?.trim())) {
+    if (!email || !fullName || !password) {
         throw new ApiError(400, "Please fill mandatory field")
     }
 
-
-    const data: createUserInput = {
-        email: email.trim().toLowerCase(),
+    // Always a password account. `provider`/`providerId` in the body are ignored on purpose: accepting
+    // them let anyone claim "google" for an existing email and get logged into that account.
+    const data: CreateUserInput = {
+        provider: "credentials",
+        email,
         fullName,
         phone,
-        provider,
-        providerId,
-        hashedPassword,
-    } as createUserInput
-
+        password,
+    }
 
     const createdUser = await Auth.createUser(data)
     const accessToken = generateAccessToken(createdUser!.id)
@@ -56,9 +66,10 @@ export const signUp = asyncHandler(async (req: Request, res: Response) => {
 export const signIn = asyncHandler(async (req: Request, res: Response) => {
 
 
-    const { email, hashedPassword }: SignIn = req.body
+    const email = typeof req.body?.email === "string" ? req.body.email : ""
+    const password = readPassword(req.body)
 
-    if (!email?.trim() || !hashedPassword?.trim()) {
+    if (!email.trim() || !password) {
         throw new ApiError(400, "Email and Password are required")
     }
 
@@ -68,7 +79,7 @@ export const signIn = asyncHandler(async (req: Request, res: Response) => {
 
     // Always run one bcrypt compare, even when there is no user or no password, so response time
     // doesn't reveal whether the email is registered.
-    const isPasswordValid = await verifyPassword(hashedPassword, credentialAccount?.passwordHash ?? DUMMY_PASSWORD_HASH)
+    const isPasswordValid = await verifyPassword(password, credentialAccount?.passwordHash ?? DUMMY_PASSWORD_HASH)
 
     // One message and status for every failure: unknown email, Google-only account, wrong password.
     if (!user || !credentialAccount?.passwordHash || !isPasswordValid) {
@@ -146,13 +157,13 @@ export const googleAuth = asyncHandler(async (req: AuthRequest, res: Response) =
         throw new ApiError(400, "Google account email not verified")
     }
 
-    const data: createUserInput = {
+    const data: CreateUserInput = {
         email: payload.email.toLowerCase(),
         fullName: payload.name,
         provider: "google",
         providerId: payload.sub,
         avatar: payload.picture
-    } as createUserInput
+    }
 
     const user = await Auth.createUser(data)
 
