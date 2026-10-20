@@ -1,3 +1,4 @@
+import { env } from './config/env'
 import express from 'express'
 import { generateOtp } from './utils/otp.utils'
 import cookieParser from 'cookie-parser'
@@ -25,7 +26,7 @@ app.use(cors({
 
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
-app.use(cookieParser(process.env.COOKIE_SECRET || "hi-cookie-secret-is-this-for-now-but-will-change-it-soon"))
+app.use(cookieParser(env.COOKIE_SECRET))
 
 
 app.use('/api/v1/auth', authRouter)

@@ -1,12 +1,13 @@
 import jwt from 'jsonwebtoken';
 import type { JwtPayload, SignOptions } from 'jsonwebtoken';
 import type { User } from '../types/user.types';
+import { env } from '../config/env';
 
-const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET || 'myaccesstoken'
+const accessTokenSecret = env.ACCESS_TOKEN_SECRET
 const accessTokenExpiry = process.env.ACCESS_TOKEN_EXPIRY || '7d' 
 
 
-const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET || 'myrefreshtoken'
+const refreshTokenSecret = env.REFRESH_TOKEN_SECRET
 const refreshTokenExpiry = process.env.REFRESH_TOKEN_EXPIRY || '15d'
 
 const generateAccessToken = (userId:string)=>{
