@@ -1,6 +1,7 @@
 import { generateAuthenticationOptions, generateRegistrationOptions, verifyAuthenticationResponse, verifyRegistrationResponse, type RegistrationResponseJSON } from "@simplewebauthn/server";
 import type { AuthenticationResponseJSON, AuthenticatorTransportFuture, PublicKeyCredentialRequestOptionsJSON, VerifiedRegistrationResponse, WebAuthnCredential } from "@simplewebauthn/server";
 import prisma from "../config/prisma";
+import { ApiError } from "../utils/apiError.utils";
 import type { Bytes } from "@prisma/client/runtime/client";
 import type { Passkey } from "../../generated/prisma/browser";
 import "dotenv/config";
@@ -24,7 +25,8 @@ export async function generateOptions(userId:string, userEmail:string, fullName:
         })),
         authenticatorSelection: {
             residentKey: 'required',
-            userVerification: 'preferred',
+            // Passkeys are a sole login factor here, so require PIN/biometric, not just a touch
+            userVerification: 'required',
         },
         attestationType: 'none',
     })
@@ -52,7 +54,7 @@ export async function verifyOptions(credentialPayload:RegistrationResponseJSON, 
         expectedChallenge,
         expectedOrigin: process.env.FRONTEND_URL || "http://localhost:3000",
         expectedRPID: process.env.DOMAIN_NAME || "localhost",
-        requireUserVerification: false,  
+        requireUserVerification: true,
     })
 
     return verification
@@ -62,17 +64,24 @@ export async function verifyOptions(credentialPayload:RegistrationResponseJSON, 
 
 export async function savePasskeyToDB(credentialID:string, publicKey:Bytes, counter:bigint, transports:string[], credentialDeviceType:string, userId:string){
 
-    await prisma.passkey.create({
-        data:{
-            credentialID,
-            publicKey,
-            counter,
-            name:transports.join(', '),
-            deviceType:credentialDeviceType,
-            userId:userId,
+    try {
+        await prisma.passkey.create({
+            data:{
+                credentialID,
+                publicKey,
+                counter,
+                name:transports.join(', '),
+                deviceType:credentialDeviceType,
+                userId:userId,
+            }
+        })
+    } catch (error) {
+        // credentialID is unique: the same authenticator was already registered (by this or another account)
+        if ((error as { code?: string })?.code === "P2002") {
+            throw new ApiError(409, "This passkey is already registered")
         }
-
-    })
+        throw error
+    }
 
 }
 
@@ -82,7 +91,7 @@ export async function savePasskeyToDB(credentialID:string, publicKey:Bytes, coun
 export async function generateLoginOptions(): Promise<PublicKeyCredentialRequestOptionsJSON>{
     return await generateAuthenticationOptions({
         rpID: process.env.DOMAIN_NAME as string || "localhost",
-        userVerification: "preferred",
+        userVerification: "required",
     })
 }
 
@@ -109,7 +118,8 @@ export async function updateCounter(credentialID:string, counter:bigint){
 export async function verifyLogin(credentialPayload:AuthenticationResponseJSON, expectedChallenge:string, savedPasskey:Passkey){
 
     const credential:WebAuthnCredential ={
-        id:savedPasskey.id,
+        // The WebAuthn credential ID (base64url), not the DB row's primary key
+        id:savedPasskey.credentialID,
         publicKey: new Uint8Array(savedPasskey.publicKey),
         counter: Number(savedPasskey.counter),
         transports: savedPasskey.name?.split(', ') as AuthenticatorTransportFuture[]
@@ -119,7 +129,7 @@ export async function verifyLogin(credentialPayload:AuthenticationResponseJSON, 
         expectedChallenge,
         expectedOrigin: process.env.FRONTEND_URL as string || "http://localhost:3000",
         expectedRPID: process.env.DOMAIN_NAME as string || "localhost",
-        requireUserVerification: false,
-        credential        
+        requireUserVerification: true,
+        credential
     })
 }
