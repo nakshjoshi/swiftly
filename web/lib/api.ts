@@ -21,13 +21,13 @@ export interface SignUpData {
   email: string;
   fullName: string;
   phone?: string;
-  hashedPassword: string;
+  password: string;
   provider: 'credentials';
 }
 
 export interface SignInData {
   email: string;
-  hashedPassword: string;
+  password: string;
   provider: 'credentials';
 }
 

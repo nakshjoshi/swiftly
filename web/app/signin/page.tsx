@@ -49,7 +49,7 @@ export default function SignInPage() {
     try {
       const response = await authApi.signIn({
         email: formData.email.trim().toLowerCase(),
-        hashedPassword: formData.password,
+        password: formData.password,
         provider: 'credentials',
       });
 

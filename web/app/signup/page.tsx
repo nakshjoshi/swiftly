@@ -64,7 +64,7 @@ export default function SignUpPage() {
         email: formData.email.trim().toLowerCase(),
         fullName: formData.fullName.trim(),
         phone: formData.phone.trim() || undefined,
-        hashedPassword: formData.password,
+        password: formData.password,
         provider: 'credentials',
       });
 
