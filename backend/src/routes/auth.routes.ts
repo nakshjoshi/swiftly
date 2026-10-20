@@ -10,7 +10,7 @@ const authRouter = Router()
 
 authRouter.route('/signup').post(signupLimiter, signUp)
 authRouter.route('/signin').post(loginLimiter, signIn)
-authRouter.route('/google/callback/').get(signupLimiter, googleAuth)
+authRouter.route('/google/callback').post(signupLimiter, googleAuth)
 
 
 authRouter.route('/refresh').post(refreshLimiter, refreshToken)

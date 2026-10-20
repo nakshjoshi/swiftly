@@ -442,7 +442,13 @@ export const authApi = {
   googleAuth: async (code:string): Promise<ApiResponse<AuthUser>> => {
 
     try {
-      const response = await apiClient.get<ApiResponse<AuthUser>>(`/api/v1/auth/google/callback?code=${code}`);
+      // POST + X-Requested-With: the backend rejects the call without this header (login-CSRF defence
+      // for Google's popup flow; a cross-site page can't send it without passing CORS).
+      const response = await apiClient.post<ApiResponse<AuthUser>>(
+        '/api/v1/auth/google/callback',
+        { code },
+        { headers: { 'X-Requested-With': 'XmlHttpRequest' } },
+      );
       return toApiResponse<AuthUser>(response.data, 'Google login successful');
     } catch (error) {
       handleAxiosError(error)

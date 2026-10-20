@@ -112,63 +112,64 @@ export const logout = asyncHandler(async (req: AuthRequest, res: Response) => {
 })
 
 
+// POST /api/v1/auth/google/callback  body: { code }
+// The web app uses Google's popup "auth-code" flow, so the code arrives in JS and is posted here.
 export const googleAuth = asyncHandler(async (req: AuthRequest, res: Response) => {
 
-    const googleCode = req.query.code
+    // Login-CSRF defence for the popup flow (Google's recommendation): require a custom header.
+    // A cross-site page can't set it without a CORS preflight, which only our own origins pass, so an
+    // attacker can't make a victim's browser redeem the attacker's code and get logged into their account.
+    if (req.header("X-Requested-With") !== "XmlHttpRequest") {
+        throw new ApiError(403, "Missing X-Requested-With header")
+    }
 
-    const googleTokens = await googleOAuth2Client.getToken(googleCode as string)
+    const code = typeof req.body?.code === "string" ? req.body.code.trim() : ""
+    if (!code) {
+        throw new ApiError(400, "Google authorization code is required")
+    }
 
-    const ticket = await googleOAuth2Client.verifyIdToken({
-        idToken: googleTokens.tokens.id_token!,
-        audience: googleClientId
+    let payload
+    try {
+        const { tokens } = await googleOAuth2Client.getToken(code)
+        if (!tokens.id_token) {
+            throw new Error("Google token response had no id_token")
+        }
+        const ticket = await googleOAuth2Client.verifyIdToken({
+            idToken: tokens.id_token,
+            audience: googleClientId
+        })
+        payload = ticket.getPayload()
+    } catch (error) {
+        // Expired/reused/forged codes land here (Google returns invalid_grant). Log the detail, keep the response generic.
+        console.warn("[auth] Google code exchange failed:", (error as Error).message)
+        throw new ApiError(401, "Google sign-in failed, please try again")
+    }
 
-    })
-
-    const payload = ticket.getPayload()
-
-    if (payload?.email_verified) {
-        const email = payload.email
-        const fullName = payload.name
-        const providerId = payload.sub
-        const avatar = payload.picture
-
-
-        const data: createUserInput = {
-            email: email,
-            fullName: fullName,
-            provider: "google",
-            providerId: providerId,
-            avatar: avatar
-        } as createUserInput
-
-
-        const user = await Auth.createUser(data)
-
-        // log("This is the user returned from google auth",user)
-
-        const accessToken = generateAccessToken(user!.id)
-        const refreshToken = generateRefreshToken(user!.id)
-
-        await Auth.saveRefreshToken(user!.id, refreshToken)
-
-        // This endpoint signs in returning Google users as well as creating new ones, so it's a 200, not a 201
-        return res
-            .status(200)
-            .cookie("accessToken", accessToken, authCookieOptions)
-            .cookie("refreshToken", refreshToken, authCookieOptions)
-            .json(new ApiResponse(200, user, "Signed in with Google"))
-
-
-
-
-
-
-    } else {
+    if (!payload?.email || !payload.email_verified) {
         throw new ApiError(400, "Google account email not verified")
     }
 
+    const data: createUserInput = {
+        email: payload.email.toLowerCase(),
+        fullName: payload.name,
+        provider: "google",
+        providerId: payload.sub,
+        avatar: payload.picture
+    } as createUserInput
 
+    const user = await Auth.createUser(data)
 
+    const accessToken = generateAccessToken(user!.id)
+    const refreshToken = generateRefreshToken(user!.id)
+
+    await Auth.saveRefreshToken(user!.id, refreshToken)
+
+    // This endpoint signs in returning Google users as well as creating new ones, so it's a 200, not a 201
+    return res
+        .status(200)
+        .cookie("accessToken", accessToken, authCookieOptions)
+        .cookie("refreshToken", refreshToken, authCookieOptions)
+        .json(new ApiResponse(200, user, "Signed in with Google"))
 })
 
 

@@ -3,7 +3,7 @@
 import { authApi } from "@/lib/api";
 import { useGoogleLogin } from "@react-oauth/google";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSnackbar } from "notistack";
 import { setAuthUser } from "@/lib/authSession";
 
@@ -16,6 +16,8 @@ export default function GoogleLogin({ mode = 'signin', className = '' }: GoogleL
     const router = useRouter();
 	const { enqueueSnackbar } = useSnackbar();
     const [isLoading, setIsLoading] = useState(false);
+    // Random per-mount value sent to Google and echoed back; a code response without it didn't come from our popup
+    const oauthState = useRef<string>(crypto.randomUUID());
 
     useEffect(() => {
         router.prefetch('/dashboard');
@@ -24,6 +26,11 @@ export default function GoogleLogin({ mode = 'signin', className = '' }: GoogleL
 
 	const responseGoogle = async (result:any) =>{
 		if(!result?.code){
+			return
+		}
+		if(result.state !== oauthState.current){
+			enqueueSnackbar('Google login failed. Please try again.', { variant: 'error' })
+			console.error("Google auth state mismatch")
 			return
 		}
 
@@ -49,7 +56,8 @@ export default function GoogleLogin({ mode = 'signin', className = '' }: GoogleL
 			enqueueSnackbar('Google popup failed. Please retry.', { variant: 'error' })
 			console.error("Google login popup error", error)
 		},
-        flow: 'auth-code'
+        flow: 'auth-code',
+        state: oauthState.current,
     })
 
 
