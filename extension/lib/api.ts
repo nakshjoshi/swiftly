@@ -126,7 +126,8 @@ export interface SessionState {
 }
 
 export interface AutofillMappingPayload {
-	resumeData: unknown;
+	// The backend loads the resume itself for the signed-in user
+	resumeId: string;
 	htmlObjectData: HTMLObjectAttributes[];
 }
 

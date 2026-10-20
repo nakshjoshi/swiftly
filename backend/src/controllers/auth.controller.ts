@@ -21,8 +21,6 @@ const DUMMY_PASSWORD_HASH = "$2b$10$qeRLVs/q1yN41TCcWEcxsuYm2kr41fiHKdnBWqmgRrpc
 
 export const signUp = asyncHandler(async (req: Request, res: Response) => {
 
-    console.log(req.body)
-
     const { email, fullName, phone, provider, providerId, hashedPassword }: createUserInput = req.body
 
     if (!email?.trim() || !fullName?.trim() || (!hashedPassword?.trim() && !providerId?.trim())) {
@@ -57,7 +55,6 @@ export const signUp = asyncHandler(async (req: Request, res: Response) => {
 
 export const signIn = asyncHandler(async (req: Request, res: Response) => {
 
-    // console.log(req.body)
 
     const { email, hashedPassword }: SignIn = req.body
 

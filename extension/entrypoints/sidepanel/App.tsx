@@ -201,7 +201,6 @@ export default function App() {
       const ack = await chrome.tabs.sendMessage(tab.id, {
         type: 'AUTOFILL_FORM',
         selectedResumeId,
-        resumeData: selectedRawResume,
       });
 
       clearTimeout(phase1Timer);

@@ -26,13 +26,13 @@ export default defineBackground(() => {
     }
 
     const payload = message.payload as {
-      resumeData?: unknown;
+      resumeId?: string;
       htmlObjectData?: HTMLObjectAttributes[];
     };
 
     const run = async () => {
-      if (payload?.resumeData === undefined || payload?.resumeData === null) {
-        sendResponse({ ok: false, error: 'Missing resumeData payload.' });
+      if (!payload?.resumeId) {
+        sendResponse({ ok: false, error: 'No resume selected.' });
         return;
       }
 
@@ -43,7 +43,7 @@ export default defineBackground(() => {
       }
 
       const result = await fetchAutofillMapping(session.apiBaseUrl, {
-        resumeData: payload.resumeData,
+        resumeId: payload.resumeId,
         htmlObjectData: payload.htmlObjectData ?? [],
       });
 

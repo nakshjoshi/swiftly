@@ -62,7 +62,7 @@ export default defineContentScript({
           .sendMessage({
             type: 'SWIFTLY_REQUEST_AUTOFILL_MAPPING',
             payload: {
-              resumeData: message?.resumeData,
+              resumeId: message?.selectedResumeId,
               htmlObjectData: llmFields,
             },
           })
