@@ -1,7 +1,8 @@
 import prisma from "../config/prisma";
 import type { createUserInput } from "../types/auth.types";
 import { ApiError } from "../utils/apiError.utils";
-import { hash, hashPassword, verifyHash } from "../utils/bcrypt.utils";
+import { hashPassword } from "../utils/bcrypt.utils";
+import { hashToken } from "../utils/tokenHash.utils";
 
 
 
@@ -24,18 +25,10 @@ export class AuthService{
 
     public async findSessionByUserIdAndToken(userId:string, token:string){
         try {
-            const sessions = await prisma.session.findMany({
-                where:{userId:userId}
+            // Tokens are stored as a SHA-256 digest, so the session is found by direct equality.
+            return await prisma.session.findFirst({
+                where:{userId:userId, refreshToken:hashToken(token)}
             })
-
-            for (const session of sessions) {
-                const isValid = await verifyHash(token, session.refreshToken)
-                if (isValid) {
-                    return session
-                }
-            }
-
-            return null;
         } catch (error) {
             
             throw new ApiError(404,"connection to DB failed")
@@ -235,7 +228,7 @@ export class AuthService{
 
     public async saveRefreshToken(userId:string, token:string){
 
-        const hashedToken = await hash(token)
+        const hashedToken = hashToken(token)
         const expiresAt = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)
 
         return await prisma.session.create({
@@ -249,20 +242,9 @@ export class AuthService{
     
     public async deleteRefreshToken(userId:string, token:string){
 
-        const sessions = await prisma.session.findMany({
-            where:{userId:userId}
+        await prisma.session.deleteMany({
+            where:{userId:userId, refreshToken:hashToken(token)}
         })
-
-        for(const session of sessions){
-            const isValid = await verifyHash(token, session.refreshToken)
-
-            if(isValid){
-                await prisma.session.delete({
-                    where:{id:session.id}
-                })
-            }
-        }
-        
     }
 
 

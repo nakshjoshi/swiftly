@@ -5,7 +5,7 @@ import { ApiError } from "../utils/apiError.utils";
 import { AuthService } from "../services/auth.service";
 import { ApiResponse } from "../utils/apiResponse.utils";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../utils/jwt.utils";
-import { verifyHash, verifyPassword } from "../utils/bcrypt.utils";
+import { verifyPassword } from "../utils/bcrypt.utils";
 import { googleClientId, googleOAuth2Client } from "../utils/googleOauth2";
 import { log } from "node:console";
 
@@ -207,12 +207,6 @@ export const refreshToken = asyncHandler(async (req: AuthRequest, res: Response)
 
     if (!matchedSession) {
         throw new ApiError(401, "Session not found, please login again")
-    }
-
-    const isTokenValid = await verifyHash(refreshToken, matchedSession.refreshToken)
-
-    if (!isTokenValid) {
-        throw new ApiError(401, "Invalid refresh token, please login again")
     }
 
     if (matchedSession.expiresAt < new Date()) {

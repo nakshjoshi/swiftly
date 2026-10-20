@@ -27,7 +27,9 @@ const generateRefreshToken = (userId:string)=>{
 
     }as JwtPayload, refreshTokenSecret,
     {
-        expiresIn:refreshTokenExpiry
+        expiresIn:refreshTokenExpiry,
+        // iat only has 1s resolution; jwtid makes every refresh token unique even if issued within the same second
+        jwtid: crypto.randomUUID()
     } as SignOptions)
 }
 
