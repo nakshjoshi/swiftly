@@ -9,21 +9,6 @@ import { hashToken } from "../utils/tokenHash.utils";
 
 export class AuthService{
 
-    public async findUserbyEmail(email:string){
-        try {
-            const user = await prisma.user.findUnique({
-                where:{email:email}
-            })
-    
-            return user;
-        } catch {
-            
-            throw new ApiError(404,"connection to DB failed")
-            
-        }
-        
-    }
-
     public async findSessionByUserIdAndToken(userId:string, token:string){
         try {
             // Tokens are stored as a SHA-256 digest, so the session is found by direct equality.
@@ -251,16 +236,16 @@ export class AuthService{
     }
 
 
-    public async getUserAuthAccount(userId:string, provider:string){
-        return await prisma.authAccount.findUnique({
-            where:{
 
-                userId_provider:{
-                userId:userId,
-                provider:provider
-                }
-            }
-        })
+    // Sign-in lookup. Both queries always run, in parallel, whether or not the email exists, so an
+    // unknown email takes the same time as a known one. (`include` would skip its second query when
+    // there's no user, which makes "not registered" measurably faster.)
+    public async findUserWithCredentialAccount(email:string){
+        const [user, credentialAccount] = await Promise.all([
+            prisma.user.findUnique({ where:{email:email} }),
+            prisma.authAccount.findFirst({ where:{provider:"credentials", user:{email:email}} }),
+        ])
+        return { user, credentialAccount }
     }
 
 

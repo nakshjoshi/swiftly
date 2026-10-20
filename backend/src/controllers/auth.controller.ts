@@ -12,6 +12,9 @@ import { googleClientId, googleOAuth2Client } from "../utils/googleOauth2";
 
 const Auth = new AuthService()
 
+// bcrypt hash of a random value nobody knows, compared against when the account has no password
+const DUMMY_PASSWORD_HASH = "$2b$10$qeRLVs/q1yN41TCcWEcxsuYm2kr41fiHKdnBWqmgRrpcVSoV/Dyfi"
+
 export const signUp = asyncHandler(async (req: Request, res: Response) => {
 
     console.log(req.body)
@@ -52,47 +55,34 @@ export const signIn = asyncHandler(async (req: Request, res: Response) => {
 
     // console.log(req.body)
 
-    const { email, hashedPassword, provider }: SignIn = req.body
+    const { email, hashedPassword }: SignIn = req.body
 
     if (!email?.trim() || !hashedPassword?.trim()) {
         throw new ApiError(400, "Email and Password are required")
     }
 
-    const userData: SignIn = {
-        email: email.trim().toLowerCase(),
-        hashedPassword: hashedPassword,
-        provider: provider || "credentials"
+    // Password login only ever checks the credentials account; a client-supplied provider would let
+    // the caller probe other accounts (e.g. google, which has no passwordHash).
+    const { user, credentialAccount } = await Auth.findUserWithCredentialAccount(email.trim().toLowerCase())
+
+    // Always run one bcrypt compare, even when there is no user or no password, so response time
+    // doesn't reveal whether the email is registered.
+    const isPasswordValid = await verifyPassword(hashedPassword, credentialAccount?.passwordHash ?? DUMMY_PASSWORD_HASH)
+
+    // One message and status for every failure: unknown email, Google-only account, wrong password.
+    if (!user || !credentialAccount?.passwordHash || !isPasswordValid) {
+        throw new ApiError(401, "Invalid email or password")
     }
 
-    const user = await Auth.findUserbyEmail(userData.email)
+    const accessToken = generateAccessToken(user.id)
+    const refreshToken = generateRefreshToken(user.id)
+    await Auth.saveRefreshToken(user.id, refreshToken)
 
-
-    if (!user) {
-        throw new ApiError(400, "user does not exist")
-    }
-    const userAuthDetails = await Auth.getUserAuthAccount(user?.id as string, userData.provider || "credentials")
-
-    if (!userAuthDetails) {
-        throw new ApiError(400, "password login not available for this user, please use your google account to login")
-    }
-
-    const isPasswordValid = await verifyPassword(userData.hashedPassword, userAuthDetails?.passwordHash as string)
-
-    if (isPasswordValid) {
-        const accessToken = generateAccessToken(user.id)
-        const refreshToken = generateRefreshToken(user.id)
-        await Auth.saveRefreshToken(user.id, refreshToken)
-
-        res
-            .cookie("accessToken", accessToken, authCookieOptions)
-            .cookie("refreshToken", refreshToken, authCookieOptions)
-            .json(new ApiResponse(201, user, "loggedIn"))
-
-    }
-
-    if (!isPasswordValid) {
-        throw new ApiError(401, "Wrong Password")
-    }
+    return res
+        .status(200)
+        .cookie("accessToken", accessToken, authCookieOptions)
+        .cookie("refreshToken", refreshToken, authCookieOptions)
+        .json(new ApiResponse(200, user, "loggedIn"))
 
 })
 
