@@ -111,8 +111,15 @@ export function getTemplateById(templateId: string): TemplateConfig {
   return tpl;
 }
 
-/** Returns the directory path for a modular template (one that has index.tex + section-modules/). */
+/**
+ * Returns the directory path for a modular template (one that has index.tex + section-modules/).
+ * templateId is client input, so it must be a registered id in templates.json before it is ever
+ * joined into a filesystem path — otherwise "../" segments could point outside config/templates.
+ */
 function getTemplateDirPath(templateId: string): string | null {
+  const { templates } = loadTemplatesJson();
+  if (!templates.some((t) => t.id === templateId)) return null;
+
   const dirPath = path.join(CONFIG_DIR, 'templates', templateId);
   return fs.existsSync(dirPath) ? dirPath : null;
 }
@@ -448,7 +455,10 @@ function assembleLaTeX(
   sections: MigrationSection[],
   context: Record<string, unknown>
 ): string {
-  const templateDir = path.join(CONFIG_DIR, 'templates', templateId);
+  const templateDir = getTemplateDirPath(templateId);
+  if (!templateDir) {
+    throw new ApiError(404, `Template "${templateId}" not found`);
+  }
   const indexTexPath = path.join(templateDir, 'index.tex');
 
   let indexContent: string;
