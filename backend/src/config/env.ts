@@ -32,7 +32,15 @@ const requiredSecret = (name: string): string => {
     return value
 }
 
+// Only an explicit NODE_ENV=development (set by `bun run dev`) relaxes cookie security.
+// Unset or anything else is treated as production, so a misconfigured deploy fails safe.
+const IS_DEV = process.env.NODE_ENV?.trim() === "development"
+
 export const env = {
+    IS_DEV,
+    // Shared parent domain for auth cookies, e.g. ".swiftly.nakshjoshi.in". Must not be set locally:
+    // a cookie for that domain is rejected by the browser on localhost.
+    COOKIE_DOMAIN: IS_DEV ? undefined : required("COOKIE_DOMAIN"),
     DATABASE_URL: required("DATABASE_URL"),
     ACCESS_TOKEN_SECRET: requiredSecret("ACCESS_TOKEN_SECRET"),
     REFRESH_TOKEN_SECRET: requiredSecret("REFRESH_TOKEN_SECRET"),

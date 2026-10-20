@@ -6,7 +6,7 @@ import { generateOptions, getUserPasskeys, verifyOptions, savePasskeyToDB, gener
 import { ApiResponse } from "../utils/apiResponse.utils";
 import type { AuthenticationResponseJSON, RegistrationResponseJSON, VerifiedRegistrationResponse, WebAuthnCredential } from "@simplewebauthn/server";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwt.utils";
-import { options } from "./auth.controller";
+import { authCookieOptions, challengeCookieOptions } from "../config/cookies";
 
 
 
@@ -23,15 +23,7 @@ export const setupPasskey = asyncHandler(async (req: AuthRequest, res: Response,
 
         return res
             .status(200)
-            .cookie("challenge", challenge, {
-                httpOnly: true,
-                secure: true,
-                sameSite: "none",
-                maxAge: 1000 * 60 * 5,
-                domain: ".swiftly.nakshjoshi.in",
-                path: "/",
-                signed: true
-            })
+            .cookie("challenge", challenge, challengeCookieOptions)
             .json(new ApiResponse(200, passkeyOptions, "Passkey options generated successfully"))
 
     } else {
@@ -63,14 +55,7 @@ export const verifyPasskey = asyncHandler(async (req: AuthRequest, res: Response
 
     res
         .status(200)
-        .clearCookie("challenge", {
-            domain: ".swiftly.nakshjoshi.in",
-            path: "/",
-            signed: true,
-            secure: true,
-            sameSite: "none",
-            httpOnly: true
-        })
+        .clearCookie("challenge", challengeCookieOptions)
         .json(new ApiResponse(200, null, "Passkey registered successfully"))
 
 
@@ -80,15 +65,7 @@ export const getPasskeyLoginOptions = asyncHandler(async (req: AuthRequest, res:
     const loginOptions = await generateLoginOptions()
     return res
         .status(200)
-        .cookie("login_challenge", loginOptions.challenge, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none",
-            maxAge: 1000 * 60 * 5,
-            domain: ".swiftly.nakshjoshi.in",
-            path: "/",
-            signed: true
-        })
+        .cookie("login_challenge", loginOptions.challenge, challengeCookieOptions)
         .json(new ApiResponse(200, loginOptions, "Passkey login options generated successfully"))
 })
 
@@ -121,15 +98,8 @@ export const verifyPasskeyLogin = asyncHandler(async (req: AuthRequest, res: Res
 
     res
         .status(200)
-        .clearCookie("login_challenge", {
-            domain: ".swiftly.nakshjoshi.in",
-            path: "/",
-            signed: true,
-            secure: true,
-            sameSite: "none",
-            httpOnly: true
-        })
-        .cookie("accessToken", accessToken, options)    // matches req.cookies?.accessToken in auth middleware
-        .cookie("refreshToken", refreshToken, options)  // matches req.cookies.refreshToken in refresh endpoint
+        .clearCookie("login_challenge", challengeCookieOptions)
+        .cookie("accessToken", accessToken, authCookieOptions)    // matches req.cookies?.accessToken in auth middleware
+        .cookie("refreshToken", refreshToken, authCookieOptions)  // matches req.cookies.refreshToken in refresh endpoint
         .json(new ApiResponse(200, passkeyWithUser.user, "Passkey login successful"))
 })

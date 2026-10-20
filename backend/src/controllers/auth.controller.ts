@@ -1,4 +1,5 @@
-import type { CookieOptions, Request, Response } from "express";
+import type { Request, Response } from "express";
+import { authCookieOptions } from "../config/cookies";
 import { asyncHandler } from "../utils/asyncHandler.utils";
 import type { AuthRequest, createUserInput, SignIn } from "../types/auth.types";
 import { ApiError } from "../utils/apiError.utils";
@@ -11,13 +12,6 @@ import { log } from "node:console";
 
 
 const Auth = new AuthService()
-export const options: CookieOptions = {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-    domain: ".swiftly.nakshjoshi.in",
-    path: "/",
-}
 
 export const signUp = asyncHandler(async (req: Request, res: Response) => {
 
@@ -48,8 +42,8 @@ export const signUp = asyncHandler(async (req: Request, res: Response) => {
 
     return res
         .status(201)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
+        .cookie("accessToken", accessToken, authCookieOptions)
+        .cookie("refreshToken", refreshToken, authCookieOptions)
         .json(new ApiResponse(201, createdUser, "User registered successfully"))
 
 })
@@ -91,8 +85,8 @@ export const signIn = asyncHandler(async (req: Request, res: Response) => {
         await Auth.saveRefreshToken(user.id, refreshToken)
 
         res
-            .cookie("accessToken", accessToken, options)
-            .cookie("refreshToken", refreshToken, options)
+            .cookie("accessToken", accessToken, authCookieOptions)
+            .cookie("refreshToken", refreshToken, authCookieOptions)
             .json(new ApiResponse(201, user, "loggedIn"))
 
     }
@@ -115,8 +109,8 @@ export const logout = asyncHandler(async (req: AuthRequest, res: Response) => {
 
     res
         .status(200)
-        .clearCookie("accessToken", options)
-        .clearCookie("refreshToken", options)
+        .clearCookie("accessToken", authCookieOptions)
+        .clearCookie("refreshToken", authCookieOptions)
         .json(`cookies cleared for user`)
 
 
@@ -166,8 +160,8 @@ export const googleAuth = asyncHandler(async (req: AuthRequest, res: Response) =
 
         return res
             .status(201)
-            .cookie("accessToken", accessToken, options)
-            .cookie("refreshToken", refreshToken, options)
+            .cookie("accessToken", accessToken, authCookieOptions)
+            .cookie("refreshToken", refreshToken, authCookieOptions)
             .json(new ApiResponse(201, user, "User registered successfully"))
 
 
@@ -211,7 +205,7 @@ export const refreshToken = asyncHandler(async (req: AuthRequest, res: Response)
 
     if (matchedSession.expiresAt < new Date()) {
         await Auth.deleteSessionById(matchedSession.id)
-        res.clearCookie("refreshToken", options).clearCookie("accessToken", options)
+        res.clearCookie("refreshToken", authCookieOptions).clearCookie("accessToken", authCookieOptions)
         throw new ApiError(401, "Refresh token expired, please login again")
     }
 
@@ -222,8 +216,8 @@ export const refreshToken = asyncHandler(async (req: AuthRequest, res: Response)
     await Auth.saveRefreshToken(matchedSession.userId, newRefreshToken)
 
     return res
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", newRefreshToken, options)
+        .cookie("accessToken", accessToken, authCookieOptions)
+        .cookie("refreshToken", newRefreshToken, authCookieOptions)
         .json(new ApiResponse(200, null, "Token refreshed successfully"))
 
 })

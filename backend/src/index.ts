@@ -18,6 +18,11 @@ const port = process.env.PORT || 3001
 
 const app = express()
 
+// In production the API sits behind one reverse proxy that terminates TLS. Trusting exactly one hop makes
+// req.ip / req.protocol reflect the real client instead of the proxy. Off locally, where nothing is in front.
+// Adjust the hop count if you add another layer (e.g. a CDN in front of the proxy).
+if (!env.IS_DEV) app.set('trust proxy', 1)
+
 app.use(cors({
     origin:["https://swiftly.nakshjoshi.in","http://localhost:3000"],
     methods: ["GET", "POST", "PUT", "DELETE"],
