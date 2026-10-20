@@ -373,6 +373,20 @@ function toApiResponse<T>(payload: unknown, fallbackMessage = 'Success'): ApiRes
   };
 }
 
+// Several requests can hit 401 at once when the access token expires (e.g. a page loading in parallel).
+// They must share one /refresh call: refresh rotates the token, and the backend treats a second use of
+// the old token as possible theft once its grace window has passed.
+let refreshInFlight: Promise<unknown> | null = null;
+
+function refreshSessionOnce(): Promise<unknown> {
+  refreshInFlight ??= apiClient
+    .post('/api/v1/auth/refresh', undefined, { _skipAuthRefresh: true } as any)
+    .finally(() => {
+      refreshInFlight = null;
+    });
+  return refreshInFlight;
+}
+
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -401,7 +415,7 @@ apiClient.interceptors.response.use(
     originalRequest._retry = true;
 
     try {
-      await apiClient.post('/api/v1/auth/refresh', undefined, { _skipAuthRefresh: true } as any);
+      await refreshSessionOnce();
       return apiClient(originalRequest);
     } catch (refreshError) {
       return Promise.reject(refreshError);
