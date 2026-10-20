@@ -30,7 +30,7 @@ export const updateEducationForResume = asyncHandler(async(req:AuthRequest, res:
     const resumeId = req.body.resumeId!
     const educationId = req.body.educationId!
 
-    const result = await profile.updateEducationTable(resumeId, educationId, {instituteName, level, startDate, endDate, location, degree, branch, grade})
+    const result = await profile.updateEducationTable(userId, resumeId, educationId, {instituteName, level, startDate, endDate, location, degree, branch, grade})
 
     return res
         .status(200)
@@ -47,7 +47,7 @@ export const updateExperienceForResume = asyncHandler(async(req:AuthRequest, res
     const resumeId = req.body.resumeId!
     const experienceId = req.body.experienceId!
 
-    const result = await profile.updateExperienceTable(resumeId, experienceId, {companyName, position, startDate, endDate, location, description})
+    const result = await profile.updateExperienceTable(userId, resumeId, experienceId, {companyName, position, startDate, endDate, location, description})
 
     return res
         .status(200)
@@ -63,7 +63,7 @@ export const updateProjectsForResume = asyncHandler(async(req:AuthRequest, res:R
     const resumeId = req.body.resumeId!
     const projectId = req.body.projectId!
 
-    const result = await profile.updateProjectsTable(resumeId, projectId, {projectName, techStack, description, githubLink, liveLink, startDate, endDate})
+    const result = await profile.updateProjectsTable(userId, resumeId, projectId, {projectName, techStack, description, githubLink, liveLink, startDate, endDate})
 
     return res
         .status(200)
@@ -78,7 +78,7 @@ export const updateSkillsForResume = asyncHandler(async(req:AuthRequest, res:Res
     const resumeId = req.body.resumeId!
     const skillId = req.body.skillId!
 
-    const result = await profile.updateSkillsTable(resumeId, skillId, {name, category})
+    const result = await profile.updateSkillsTable(userId, resumeId, skillId, {name, category})
 
     return res
         .status(200)
@@ -94,7 +94,7 @@ export const updateAchievementsForResume = asyncHandler(async(req:AuthRequest, r
     const resumeId = req.body.resumeId!
     const achievementId = req.body.achievementId!
 
-    const result = await profile.updateAchievementsTable(resumeId, achievementId, {title, org, date, description})
+    const result = await profile.updateAchievementsTable(userId, resumeId, achievementId, {title, org, date, description})
 
     return res
         .status(200)
@@ -110,7 +110,7 @@ export const updatePorForResume = asyncHandler(async(req:AuthRequest, res:Respon
     const resumeId = req.body.resumeId!
     const porId = req.body.porId!
 
-    const result = await profile.updatePorTable(resumeId, porId, {title, org, startDate, endDate, description})
+    const result = await profile.updatePorTable(userId, resumeId, porId, {title, org, startDate, endDate, description})
 
     return res
         .status(200)
@@ -126,7 +126,7 @@ export const updatePublicationsForResume = asyncHandler(async(req:AuthRequest, r
     const resumeId = req.body.resumeId!
     const publicationId = req.body.publicationId!
 
-    const result = await profile.updatePublicationsTable(resumeId, publicationId, {authors, title, conference, place, publicationDate, description})
+    const result = await profile.updatePublicationsTable(userId, resumeId, publicationId, {authors, title, conference, place, publicationDate, description})
 
     return res
         .status(200)

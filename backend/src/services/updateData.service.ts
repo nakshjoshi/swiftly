@@ -39,7 +39,7 @@ export class ProfileUpdate{
     }
 
 
-    public async updateEducationTable(resume:string, educationId:string, data:EducationTable){
+    public async updateEducationTable(user:string, resume:string, educationId:string, data:EducationTable){
 
         const {instituteName, level, startDate, endDate, location, degree, branch, grade} = data
 
@@ -47,7 +47,8 @@ export class ProfileUpdate{
 
             where: {
                 id: educationId,
-                resumeId: resume
+                resumeId: resume,
+                resume: { userId: user }
             },
             data:{
                 ...(instituteName && {instituteName}),
@@ -64,7 +65,7 @@ export class ProfileUpdate{
         return result
     }
 
-    public async updateExperienceTable(resume:string, experienceId:string, data:ExperienceTable){
+    public async updateExperienceTable(user:string, resume:string, experienceId:string, data:ExperienceTable){
 
         const {companyName, location, type, startDate, endDate, position, description, proofLink} = data
 
@@ -72,7 +73,8 @@ export class ProfileUpdate{
 
             where: {
                 id: experienceId,
-                resumeId: resume
+                resumeId: resume,
+                resume: { userId: user }
             },
             data:{
                 ...(companyName && {companyName}),
@@ -89,7 +91,7 @@ export class ProfileUpdate{
         return result
     }
 
-     public async updateProjectsTable(resume:string, projectId:string, data:ProjectsTable){
+     public async updateProjectsTable(user:string, resume:string, projectId:string, data:ProjectsTable){
 
         const {projectName, techStack, description, githubLink, liveLink, startDate, endDate} = data
 
@@ -97,7 +99,8 @@ export class ProfileUpdate{
 
             where: {
                 id: projectId,
-                resumeId: resume
+                resumeId: resume,
+                resume: { userId: user }
             },
             data:{
                 ...(projectName && {projectName}),
@@ -113,7 +116,7 @@ export class ProfileUpdate{
         return result
     }
 
-    public async updateSkillsTable(resume:string, skillId:string, data:SkillsTable){
+    public async updateSkillsTable(user:string, resume:string, skillId:string, data:SkillsTable){
 
         const {name, category} = data
 
@@ -121,7 +124,8 @@ export class ProfileUpdate{
 
             where: {
                 id: skillId,
-                resumeId: resume
+                resumeId: resume,
+                resume: { userId: user }
             },
             data:{
                 ...(name && {name}),
@@ -132,7 +136,7 @@ export class ProfileUpdate{
         return result
     }
 
-    public async updateAchievementsTable(resume:string, achievementId:string, data:AchievementsTable){
+    public async updateAchievementsTable(user:string, resume:string, achievementId:string, data:AchievementsTable){
 
         const {title, org, date, description} = data
 
@@ -140,7 +144,8 @@ export class ProfileUpdate{
 
             where: {
                 id: achievementId,
-                resumeId: resume
+                resumeId: resume,
+                resume: { userId: user }
             },
             data:{
                 ...(title && {title}),
@@ -154,7 +159,7 @@ export class ProfileUpdate{
     }
 
 
-    public async updatePorTable(resume:string, porId:string, data:PorTable){
+    public async updatePorTable(user:string, resume:string, porId:string, data:PorTable){
 
         const {title, org, startDate, endDate, description} = data
 
@@ -162,7 +167,8 @@ export class ProfileUpdate{
 
             where: {
                 id: porId,
-                resumeId: resume
+                resumeId: resume,
+                resume: { userId: user }
             },
             data:{
                 ...(title && {title}),
@@ -177,7 +183,7 @@ export class ProfileUpdate{
     }
 
 
-    public async updatePublicationsTable(resume:string, publicationId:string, data:PublicationsTable){
+    public async updatePublicationsTable(user:string, resume:string, publicationId:string, data:PublicationsTable){
 
         const {authors, title, conference, place, publicationDate, description} = data
 
@@ -185,7 +191,8 @@ export class ProfileUpdate{
 
             where: {
                 id: publicationId,
-                resumeId: resume
+                resumeId: resume,
+                resume: { userId: user }
             },
             data:{
                 ...(authors && {authors}),

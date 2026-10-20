@@ -35,6 +35,16 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
         } else if (err?.name === 'MulterError') {
             statusCode = 400
             message = err.message
+        } else if (err?.code === 'P2025') {
+            // Prisma: record to update/delete not found (or not owned by the caller — deliberately indistinguishable).
+            statusCode = 404
+            message = "Record not found"
+        } else if (err?.code === 'P2002') {
+            statusCode = 409
+            message = "Record already exists"
+        } else if (err?.name === 'PrismaClientValidationError') {
+            statusCode = 400
+            message = "Invalid request data"
         }
     }
 
