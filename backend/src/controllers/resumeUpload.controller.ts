@@ -39,6 +39,10 @@ export const uploadAndParseResume = asyncHandler( async( req: AuthRequest, res:R
     const resume = req.file
     const userId = req.userId
 
+    if (!userId) {
+        throw new ApiError(401, "Unauthorized")
+    }
+
     if(!resume){
         throw new ApiError(400, "Upload Resume File Failed")
     }
