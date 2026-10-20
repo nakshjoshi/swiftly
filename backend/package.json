@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "@types/bcrypt": "^6.0.0",
     "@types/bun": "latest",
     "@types/cookie-parser": "^1.4.10",
@@ -17,13 +18,18 @@
     "@types/pdf-parse": "^1.1.5",
     "@types/pg": "^8.20.0",
     "@types/ws": "^8.18.1",
+    "eslint": "^9.39.5",
+    "globals": "^17.13.0",
     "prisma": "^7.4.2",
-    "tsx": "^4.22.0"
+    "tsx": "^4.22.0",
+    "typescript-eslint": "^8.72.0"
   },
   "scripts": {
     "dev": "NODE_ENV=development bun --env-file=.env --watch src/index.ts",
     "build": "bun x prisma generate && bun x prisma migrate deploy",
-    "start": "bun src/index.ts"
+    "start": "bun src/index.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"
