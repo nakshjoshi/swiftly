@@ -1,6 +1,8 @@
 import { env } from './config/env'
 import express from 'express'
 import cookieParser from 'cookie-parser'
+import helmet from 'helmet'
+import { globalLimiter } from './middlewares/rateLimit.middleware'
 import authRouter from './routes/auth.routes'
 import resumeRouter from './routes/resume.routes'
 import cors from "cors"
@@ -22,11 +24,17 @@ const app = express()
 // Adjust the hop count if you add another layer (e.g. a CDN in front of the proxy).
 if (!env.IS_DEV) app.set('trust proxy', 1)
 
+// Security headers. CORP is relaxed to same-site so the web app on swiftly.nakshjoshi.in can still embed
+// API responses (e.g. a compiled PDF) served from the api.* subdomain.
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'same-site' } }))
+
 app.use(cors({
     origin:["https://swiftly.nakshjoshi.in","http://localhost:3000"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }))
+
+app.use(globalLimiter)
 
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))

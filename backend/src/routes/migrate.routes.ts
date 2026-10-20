@@ -8,6 +8,8 @@ import {
   getLatexSource,
 } from '../controllers/migrate.controller';
 
+import { compileLimiter } from '../middlewares/rateLimit.middleware';
+
 const migrateRouter = Router();
 
 // GET /api/v1/migrate/templates — list available templates
@@ -20,7 +22,7 @@ migrateRouter.get('/meta/:templateId', authMiddleware, getTemplateMeta);
 migrateRouter.get('/schema/:templateId', authMiddleware, getTemplateSchema);
 
 // POST /api/v1/migrate/compile — compile resume + template → PDF
-migrateRouter.post('/compile', authMiddleware, compileMigratedResume);
+migrateRouter.post('/compile', authMiddleware, compileLimiter, compileMigratedResume);
 
 // POST /api/v1/migrate/latex — render resume → .tex string for download
 migrateRouter.post('/latex', authMiddleware, getLatexSource);
