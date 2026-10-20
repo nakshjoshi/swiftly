@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import prisma from "../config/prisma";
+import type { Prisma } from "../../generated/prisma/client";
 import type { createUserInput } from "../types/auth.types";
 import { ApiError } from "../utils/apiError.utils";
 import { hashPassword } from "../utils/bcrypt.utils";
@@ -212,22 +213,50 @@ export class AuthService{
     }
 
 
-    public async saveRefreshToken(userId:string, token:string){
-
-        const hashedToken = hashToken(token)
+    // Creates the session row for a freshly issued refresh token, sweeping the user's expired sessions
+    // in the same transaction so rows can't pile up (uses the Session(userId) index, so it stays cheap).
+    private async createSession(tx:Prisma.TransactionClient, userId:string, token:string){
         // Session lifetime follows the token's own exp claim, so it always matches REFRESH_TOKEN_EXPIRY
         const { exp } = jwt.decode(token) as { exp: number }
-        const expiresAt = new Date(exp * 1000)
 
-        return await prisma.session.create({
+        await tx.session.deleteMany({
+            where:{userId:userId, expiresAt:{lt:new Date()}}
+        })
+        return await tx.session.create({
             data:{
                 userId:userId,
-                refreshToken: hashedToken,
-                expiresAt: expiresAt
+                refreshToken: hashToken(token),
+                expiresAt: new Date(exp * 1000)
             }
         })
     }
-    
+
+    public async saveRefreshToken(userId:string, token:string){
+        return await prisma.$transaction((tx) => this.createSession(tx, userId, token))
+    }
+
+    // Retires `sessionId` and creates the session for `newToken` atomically: either both happen or
+    // neither does, so a crash mid-refresh can't leave the user with no valid session.
+    // Returns null if the session was already retired, i.e. a concurrent refresh with the same token
+    // won the race; only one of them may mint a new session.
+    public async rotateSession(sessionId:string, userId:string, newToken:string){
+        return await prisma.$transaction(async (tx) => {
+            const retired = await tx.session.updateMany({
+                where:{id:sessionId, revokedAt:null},
+                data:{revokedAt:new Date()}
+            })
+            if (retired.count === 0) return null
+            return await this.createSession(tx, userId, newToken)
+        })
+    }
+
+    // Response to refresh-token reuse: sign the user out of every device.
+    public async revokeAllSessions(userId:string){
+        await prisma.session.deleteMany({
+            where:{userId:userId}
+        })
+    }
+
     public async deleteRefreshToken(userId:string, token:string){
 
         await prisma.session.deleteMany({

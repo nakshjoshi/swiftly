@@ -81,9 +81,14 @@ model Session {
   device       String?
   ip           String?
   expiresAt    DateTime
+  // Set when the session is rotated by /refresh. The row is kept until expiresAt so a replay of the
+  // old refresh token can be recognised as reuse (likely theft) instead of looking like an unknown token.
+  revokedAt    DateTime?
   createdAt    DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Resume {

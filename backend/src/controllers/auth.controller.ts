@@ -13,6 +13,10 @@ import { googleClientId, googleOAuth2Client } from "../utils/googleOauth2";
 const Auth = new AuthService()
 
 // bcrypt hash of a random value nobody knows, compared against when the account has no password
+// Two refreshes with the same token inside this window (e.g. two tabs waking up together) are treated as a
+// race, not as theft. After it, presenting an already-rotated token revokes every session of the user.
+const REFRESH_REUSE_GRACE_MS = 30 * 1000
+
 const DUMMY_PASSWORD_HASH = "$2b$10$qeRLVs/q1yN41TCcWEcxsuYm2kr41fiHKdnBWqmgRrpcVSoV/Dyfi"
 
 export const signUp = asyncHandler(async (req: Request, res: Response) => {
@@ -192,6 +196,21 @@ export const refreshToken = asyncHandler(async (req: AuthRequest, res: Response)
         throw new ApiError(401, "Session not found, please login again")
     }
 
+    if (matchedSession.revokedAt) {
+        // This refresh token was already exchanged for a new one.
+        if (Date.now() - matchedSession.revokedAt.getTime() <= REFRESH_REUSE_GRACE_MS) {
+            // Benign: another tab/request refreshed with the same token a moment ago and already got the
+            // new cookies. Don't clear cookies here, that would wipe the fresh ones the winner just set.
+            throw new ApiError(401, "Session was just refreshed, please retry")
+        }
+        // A rotated token showing up later means two parties hold it: the user and whoever copied it.
+        // We can't tell which is which, so end every session and make the real user sign in again.
+        console.warn(`[auth] refresh token reuse detected for user ${userId}; revoking all sessions`)
+        await Auth.revokeAllSessions(userId)
+        res.clearCookie("refreshToken", authCookieOptions).clearCookie("accessToken", authCookieOptions)
+        throw new ApiError(401, "Session expired, please sign in again")
+    }
+
     if (matchedSession.expiresAt < new Date()) {
         await Auth.deleteSessionById(matchedSession.id)
         res.clearCookie("refreshToken", authCookieOptions).clearCookie("accessToken", authCookieOptions)
@@ -201,8 +220,11 @@ export const refreshToken = asyncHandler(async (req: AuthRequest, res: Response)
     const accessToken = generateAccessToken(matchedSession.userId)
     const newRefreshToken = generateRefreshToken(matchedSession.userId)
 
-    await Auth.deleteSessionById(matchedSession.id)
-    await Auth.saveRefreshToken(matchedSession.userId, newRefreshToken)
+    const newSession = await Auth.rotateSession(matchedSession.id, matchedSession.userId, newRefreshToken)
+    if (!newSession) {
+        // Lost a race with a concurrent refresh of the same token; that request has the new cookies
+        throw new ApiError(401, "Session was just refreshed, please retry")
+    }
 
     return res
         .cookie("accessToken", accessToken, authCookieOptions)
